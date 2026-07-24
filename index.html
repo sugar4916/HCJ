@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="김보민">
+<meta name="description" content="경성대학교 일어일문학과 김보민의 포트폴리오 페이지">
+<title>김보민 포트폴리오</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#F7F4EC;
+    --ink:#20303A;
+    --forest:#2F5233;
+    --forest-light:#5C8A5F;
+    --forest-soft:#E6EDE3;
+    --mustard:#E3A857;
+    --hanko:#B23A2E;
+    --line:#D9D2C3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Noto Sans KR', sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    line-height:1.7;
+  }
+  h1,h2,h3{font-family:'Gowun Batang', serif;}
+
+  header{
+    position:relative;
+    background:var(--forest-light);
+    color:var(--cream);
+    padding:64px 20px 56px;
+    text-align:center;
+    overflow:hidden;
+  }
+  header::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 18px);
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.8rem;
+    letter-spacing:0.14em;
+    color:var(--mustard);
+    text-transform:uppercase;
+  }
+  header h1{
+    font-size:2.4rem;
+    margin:14px 0 10px;
+  }
+  header p.sub{
+    color:#D7E2D3;
+    font-size:1rem;
+    max-width:520px;
+    margin:0 auto;
+  }
+
+  figure.profile-img{
+    margin:28px auto 6px;
+    display:inline-block;
+    position:relative;
+  }
+  figure.profile-img img{
+    width:260px;
+    height:260px;
+    object-fit:cover;
+    border-radius:50%;
+    border:5px solid var(--mustard);
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+  }
+  .hanko{
+    position:absolute;
+    bottom:-6px;
+    right:-14px;
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    background:var(--hanko);
+    border:3px solid #fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-family:'Gowun Batang', serif;
+    font-weight:700;
+    font-size:1.1rem;
+    transform:rotate(-8deg);
+    box-shadow:0 4px 10px rgba(0,0,0,0.3);
+  }
+  figcaption{
+    font-size:0.85rem;
+    color:#B7C4B4;
+    margin-top:14px;
+  }
+
+  nav{
+    background:var(--ink);
+    padding:14px;
+    position:sticky;
+    top:0;
+    z-index:100;
+  }
+  nav ul{
+    list-style:none;
+    display:flex;
+    justify-content:center;
+    gap:28px;
+    flex-wrap:wrap;
+  }
+  nav a{
+    color:#EDE7D8;
+    text-decoration:none;
+    font-weight:500;
+    font-size:0.95rem;
+    border-bottom:2px solid transparent;
+    padding-bottom:2px;
+    transition:border-color 0.25s, color 0.25s;
+  }
+  nav a:hover{
+    color:var(--mustard);
+    border-color:var(--mustard);
+  }
+
+  .container{
+    display:flex;
+    max-width:1080px;
+    margin:36px auto;
+    padding:0 20px;
+    gap:28px;
+  }
+  section{flex:3;}
+  aside{
+    flex:1;
+    background:#fff;
+    padding:24px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    height:fit-content;
+    position:sticky;
+    top:80px;
+  }
+  article{
+    background:#fff;
+    padding:28px;
+    margin-bottom:26px;
+    border-radius:10px;
+    border:1px solid var(--line);
+  }
+  h2{
+    color:var(--forest);
+    font-size:1.4rem;
+    padding-bottom:10px;
+    margin-bottom:18px;
+    border-bottom:2px solid var(--forest-soft);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .timeline{list-style:none;margin-top:8px;}
+  .timeline li{
+    position:relative;
+    padding:4px 0 18px 26px;
+    border-left:2px solid var(--forest-soft);
+  }
+  .timeline li:last-child{border-left:2px solid transparent;}
+  .timeline li.ongoing::before{background:var(--hanko);}
+  .timeline li::before{
+    content:"";
+    position:absolute;
+    left:-6px; top:6px;
+    width:10px; height:10px;
+    border-radius:50%;
+    background:var(--mustard);
+  }
+  .timeline .year{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.8rem;
+    color:var(--forest);
+    font-weight:600;
+  }
+
+  table{width:100%;border-collapse:collapse;margin-top:15px;}
+  th,td{border:1px solid var(--line);padding:12px;text-align:center;}
+  th{background:var(--forest);color:#fff;font-weight:500;}
+  meter{width:120px;}
+
+  .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.78rem;
+    background:var(--forest-soft);
+    color:var(--forest);
+    padding:5px 10px;
+    border-radius:20px;
+  }
+
+  video{
+    width:100%;
+    max-width:600px;
+    border-radius:10px;
+    margin-top:12px;
+    border:1px solid var(--line);
+  }
+
+  form fieldset{
+    border:1px solid var(--line);
+    padding:22px;
+    border-radius:8px;
+  }
+  legend{
+    font-weight:700;
+    padding:0 8px;
+    color:var(--forest);
+    font-family:'Gowun Batang', serif;
+  }
+  .form-group{margin-bottom:15px;}
+  .form-group label{display:block;margin-bottom:5px;font-weight:500;font-size:0.9rem;}
+  input[type="text"], input[type="email"], textarea{
+    width:100%;
+    padding:10px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-family:inherit;
+  }
+  textarea{height:100px;resize:vertical;}
+  button[type="submit"]{
+    background:var(--forest);
+    color:#fff;
+    border:none;
+    padding:12px 26px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:1rem;
+    font-weight:700;
+    transition:background 0.25s;
+  }
+  button[type="submit"]:hover{background:#243F27;}
+
+  footer{
+    background:var(--ink);
+    color:#B7C4B4;
+    text-align:center;
+    padding:24px;
+    margin-top:40px;
+    font-size:0.85rem;
+  }
+
+  @media (max-width:760px){
+    .container{flex-direction:column;}
+    aside{position:static;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Self Introduction</p>
+  <h1>안녕하세요, <mark style="background:var(--mustard); color:var(--ink); padding:0 6px;">김보민</mark>입니다 🐸</h1>
+  <p class="sub">경성대학교 일어일문학과(22학번) · 광고홍보학과 복수전공 · 부산 기반</p>
+  <p style="font-family:'JetBrains Mono', monospace; font-size:0.82rem; color:var(--mustard); margin-top:10px; letter-spacing:0.04em;">일본어 × 광고 × AI를 잇는 사람</p>
+
+  <figure class="profile-img">
+    <img src="keroro_profile.jpg" alt="김보민 대신 케로로 프로필 이미지">
+  </figure>
+</header>
+
+<nav>
+  <ul>
+    <li><a href="#about">프로필</a></li>
+    <li><a href="#timeline">활동 기록</a></li>
+    <li><a href="#skills">역량</a></li>
+    <li><a href="#media">소개 영상</a></li>
+    <li><a href="#contact">연락하기</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+
+  <section>
+    <article id="about">
+      <h2>👤 저는 이런 사람이에요</h2>
+      <p>
+        경성대학교에서 <strong>일어일문학</strong>과 <strong>광고홍보학</strong>을 복수전공하고 있는 김보민입니다.
+        일본 후쿠오카의 세이난가쿠인대학(西南学院大学)에서 교환학생으로 지내며 언어와 문화를 몸으로 익혔고,
+        지금은 <strong>JLPT N2</strong>를 바탕으로 실무에서도 일본어를 활용하고 있어요.
+      </p>
+      <br>
+      <p>
+        일본어와 광고 지식을 살리고, 지금 배우고 있는 <strong>AI와 다양한 프로그램</strong>도 잘 활용할 수 있는 사람이 되고 싶습니다.
+      </p>
+      <br>
+
+      <details>
+        <summary>📜 최근 활동 요약 보기 (클릭)</summary>
+        <ul style="margin-top:10px; padding-left:20px;">
+          <li><strong>2023–2024년:</strong> 세이난가쿠인대학 교환학생</li>
+          <li><strong>2023–2024년:</strong> 청소년 방일단 교류 프로그램 참여</li>
+          <li><strong>2026년:</strong> 일본 IT·AI 특화인재 양성과정 K-Move 진행 중</li>
+        </ul>
+      </details>
+
+    </article>
+
+    <article id="timeline">
+      <h2>🗓 활동 타임라인</h2>
+      <ul class="timeline">
+        <li><span class="year">2022</span><br>경성대학교 일어일문학과 입학, 광고홍보학과 복수전공 시작</li>
+        <li><span class="year">2023–2024</span><br>세이난가쿠인대학(후쿠오카) 교환학생</li>
+        <li><span class="year">2023–2024</span><br>청소년 방일단 교류 프로그램 참여</li>
+        <li class="ongoing"><span class="year">2026</span><br>일본 IT·AI 특화인재 양성과정 K-Move <span style="color:var(--hanko); font-family:'JetBrains Mono',monospace; font-size:0.75rem;">● 진행 중</span></li>
+      </ul>
+    </article>
+
+    <article id="skills">
+      <h2>🛠 역량 및 관심 분야</h2>
+      <p>언어, 리포트 작성, 디자인 툴을 아우르는 실무 역량입니다. 최근에는 AI 도구를 업무에 접목하는 능력도 함께 키우고 있습니다.</p>
+
+      <table>
+        <thead>
+          <tr><th>항목</th><th>숙련도</th><th>비고</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>한국어 (모국어)</strong></td>
+            <td><progress value="10" max="10"></progress> 100%</td>
+            <td><meter value="1.0" min="0" max="1.0"></meter></td>
+          </tr>
+          <tr>
+            <td><strong>일본어 (JLPT N2)</strong></td>
+            <td><progress value="9" max="10"></progress> 90%</td>
+            <td><meter value="0.9" min="0" max="1.0"></meter></td>
+          </tr>
+          <tr>
+            <td><strong>리포트/기획서 작성</strong></td>
+            <td><progress value="8.5" max="10"></progress> 85%</td>
+            <td><meter value="0.85" min="0" max="1.0"></meter></td>
+          </tr>
+          <tr>
+            <td><strong>Adobe (Premiere·Photoshop·InDesign)</strong></td>
+            <td><progress value="7.5" max="10"></progress> 75%</td>
+            <td><meter value="0.75" min="0" max="1.0"></meter></td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article id="media">
+      <h2>🎥 소개 영상</h2>
+      <br>
+      <video controls poster="keroro_profile.jpg">
+        <source src="bomin_intro.mp4" type="video/mp4">
+        브라우저가 video 태그를 지원하지 않습니다.
+      </video>
+    </article>
+
+    <article id="contact">
+      <h2>✉️ 연락 및 문의</h2>
+      <form action="#" method="get">
+        <fieldset>
+          <legend>메시지 남기기</legend>
+          <div class="form-group">
+            <label for="client-name">성함:</label>
+            <input type="text" id="client-name" name="client-name" placeholder="이름을 입력하세요" required>
+          </div>
+          <div class="form-group">
+            <label for="client-email">이메일:</label>
+            <input type="email" id="client-email" name="client-email" placeholder="id@domain.com" required>
+          </div>
+          <div class="form-group">
+            <label for="details">내용:</label>
+            <textarea id="details" name="details" placeholder="하고 싶은 말을 남겨주세요."></textarea>
+          </div>
+          <button type="submit">제출하기</button>
+        </fieldset>
+      </form>
+    </article>
+  </section>
+
+  <aside>
+    <h3>📌 Quick Profile</h3>
+    <br>
+    <p>👤 <strong>이름:</strong> 김보민</p>
+    <p>🏫 <strong>학교:</strong> 경성대학교</p>
+    <p>📖 <strong>전공:</strong> 일어일문학과 (22학번)</p>
+    <p>📣 <strong>복수전공:</strong> 광고홍보학과</p>
+    <p>📍 <strong>지역:</strong> 부산</p>
+    <br>
+    <hr style="border-color:var(--line);">
+    <br>
+    <h3>🔗 연락처</h3>
+    <ul style="padding-left:20px; margin-top:10px;">
+      <li><a href="mailto:sugar2183@naver.com" style="color:var(--forest);">sugar2183@naver.com</a></li>
+    </ul>
+  </aside>
+
+</div>
+
+<footer>
+  <p>Copyright &copy; 2026 Bomin. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
