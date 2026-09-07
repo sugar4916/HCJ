@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VISIT BUSAN | 日本人のための釜山公式観光ガイド</title>
+  <meta name="description"
+    content="日本から一番近い海外リゾート、韓国・釜山（プサン）の公式トラベルガイド。おすすめ観光スポット、名物グルメ、エリア別ガイド、交通・WOWPASS情報まで詳しく紹介します。">
+  <meta name="keywords" content="釜山旅行, 釜山観光, ヘウンデ, クァンアンリ, 南浦洞, 釜山グルメ, デジクッパ, WOWPASS">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="VISIT BUSAN | 日本人のための釜山公式観光ガイド">
+  <meta property="og:description" content="もっと近く、もっと魅力的な釜山へ。海と食と文化が調和する釜山旅のすべて。">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#0F3B60',
+              blue: '#1A5F9E',
+              orange: '#E36414',
+              teal: '#00A896',
+              light: '#F8FAFC',
+              dark: '#1E293B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-orange selection:text-white">
+
+  <!-- Accessibility: Skip Link -->
+  <a href="#main-content"
+    class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-brand-navy focus:text-white focus:rounded shadow-lg">
+    メインコンテンツへスキップ
+  </a>
+
+  <!-- Header -->
+  <header id="main-header"
+    class="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div
+          class="w-10 h-10 rounded-lg bg-brand-navy flex items-center justify-center text-white text-lg font-bold shadow-md group-hover:bg-brand-blue transition-colors">
+          <i class="fa-solid fa-water"></i>
+        </div>
+        <div>
+          <span class="logo-text text-xl font-black tracking-tight text-brand-navy block leading-none font-en">VISIT
+            BUSAN</span>
+          <span class="text-xs text-slate-500 font-medium tracking-wider">釜山公式観光ガイド</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center gap-8">
+        <a href="#areas"
+          class="nav-link text-sm font-semibold text-slate-700 hover:text-brand-orange transition-colors">エリア案内</a>
+        <a href="#gourmet"
+          class="nav-link text-sm font-semibold text-slate-700 hover:text-brand-orange transition-colors">釜山グルメ</a>
+        <a href="#spots"
+          class="nav-link text-sm font-semibold text-slate-700 hover:text-brand-orange transition-colors">観光スポット</a>
+        <a href="#tips"
+          class="nav-link text-sm font-semibold text-slate-700 hover:text-brand-orange transition-colors">お役立ち情報</a>
+        <a href="#faq"
+          class="nav-link text-sm font-semibold text-slate-700 hover:text-brand-orange transition-colors">FAQ</a>
+      </nav>
+
+      <!-- Right Utility -->
+      <div class="hidden md:flex items-center gap-4">
+        <span
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-brand-blue border border-blue-200">
+          <i class="fa-solid fa-language"></i> 日本語
+        </span>
+        <a href="#tips"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-navy hover:bg-brand-blue text-white text-xs font-bold transition-colors shadow-sm">
+          <i class="fa-solid fa-plane-departure"></i> 旅の準備
+        </a>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button type="button" id="mobile-menu-btn"
+        class="md:hidden p-2 rounded-lg text-slate-600 hover:text-brand-navy hover:bg-slate-100" aria-label="メニューを開く">
+        <i class="fa-solid fa-bars text-xl"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer Menu -->
+  <div id="mobile-menu"
+    class="hidden fixed inset-0 z-50 bg-brand-navy text-white flex-col p-6 translate-x-full transition-transform duration-300">
+    <div class="flex items-center justify-between pb-6 border-b border-white/10">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-water text-xl text-brand-orange"></i>
+        <span class="font-bold tracking-wider font-en">VISIT BUSAN</span>
+      </div>
+      <button type="button" id="mobile-menu-close" class="p-2 text-white/80 hover:text-white" aria-label="メニューを閉じる">
+        <i class="fa-solid fa-xmark text-2xl"></i>
+      </button>
+    </div>
+    <nav class="flex flex-col gap-6 py-8 text-lg font-medium">
+      <a href="#areas" class="mobile-nav-link hover:text-brand-orange transition-colors">エリア案内</a>
+      <a href="#gourmet" class="mobile-nav-link hover:text-brand-orange transition-colors">釜山グルメ</a>
+      <a href="#spots" class="mobile-nav-link hover:text-brand-orange transition-colors">観光スポット</a>
+      <a href="#tips" class="mobile-nav-link hover:text-brand-orange transition-colors">お役立ち情報</a>
+      <a href="#faq" class="mobile-nav-link hover:text-brand-orange transition-colors">よくある質問 (FAQ)</a>
+    </nav>
+    <div class="mt-auto pt-6 border-t border-white/10 text-xs text-white/60">
+      <p>釜山観光通訳案内電話: 1330 (日本語対応・24時間)</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main id="main-content" class="pt-20">
+
+    <!-- Hero Section -->
+    <section id="hero" class="relative min-h-[620px] flex items-center justify-center bg-cover bg-center text-white"
+      style="background-image: url('https://images.unsplash.com/photo-1578637387939-43c525550085?q=80&w=1920&auto=format&fit=crop');">
+      <div class="absolute inset-0 hero-overlay"></div>
+
+      <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-20 text-center">
+        <div
+          class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-semibold uppercase tracking-wider mb-6 border border-white/20">
+          <i class="fa-regular fa-compass text-brand-orange"></i> 2026年 最新ガイド
+        </div>
+        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight mb-6">
+          もっと近く、もっと魅力的な<br class="hidden sm:inline">
+          <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-amber-200">港町・釜山（プサン）へ</span>
+        </h1>
+        <p class="text-base sm:text-lg text-slate-200 max-w-2xl mx-auto mb-10 leading-relaxed">
+          東京・成田から約2時間半、福岡から高速船で3時間。<br>
+          エメラルドグリーンの海、活気あふれる屋台グルメ、歴史とアートが共存する釜山旅のすべてを案内します。
+        </p>
+
+        <!-- Hero Quick Links -->
+        <div class="flex flex-wrap items-center justify-center gap-3 max-w-3xl mx-auto">
+          <a href="#areas"
+            class="px-5 py-3 rounded-xl bg-brand-orange hover:bg-orange-600 text-white font-bold text-sm shadow-md transition-all flex items-center gap-2">
+            <i class="fa-solid fa-map-location-dot"></i> 主要エリアを見る
+          </a>
+          <a href="#tips"
+            class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold text-sm border border-white/30 transition-all flex items-center gap-2">
+            <i class="fa-solid fa-credit-card"></i> WOWPASS・交通ガイド
+          </a>
+          <a href="#gourmet"
+            class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold text-sm border border-white/30 transition-all flex items-center gap-2">
+            <i class="fa-solid fa-utensils"></i> 名物グルメ
+          </a>
+        </div>
+
+        <!-- Info Badges -->
+        <div class="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-white/15 pt-8 text-left">
+          <div class="p-3 bg-black/20 rounded-lg backdrop-blur-sm">
+            <span class="text-xs text-slate-300 block font-light">フライト所要時間</span>
+            <span class="text-base font-bold text-white">福岡 約50分 / 関西 約1.5時間</span>
+          </div>
+          <div class="p-3 bg-black/20 rounded-lg backdrop-blur-sm">
+            <span class="text-xs text-slate-300 block font-light">時差</span>
+            <span class="text-base font-bold text-white">時差なし (日本と同じ)</span>
+          </div>
+          <div class="p-3 bg-black/20 rounded-lg backdrop-blur-sm">
+            <span class="text-xs text-slate-300 block font-light">ビザ (観光目的)</span>
+            <span class="text-base font-bold text-white">90日以内の滞在は不要</span>
+          </div>
+          <div class="p-3 bg-black/20 rounded-lg backdrop-blur-sm">
+            <span class="text-xs text-slate-300 block font-light">決済トレンド</span>
+            <span class="text-base font-bold text-white">カード / WOWPASS 主流</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Areas Section -->
+    <section id="areas" class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <span class="text-brand-orange text-xs font-bold tracking-widest uppercase block mb-2 font-en">AREA
+            GUIDE</span>
+          <h2 class="text-3xl font-black text-brand-navy sm:text-4xl tracking-tight">目的で選ぶ、釜山の主要4大エリア</h2>
+          <p class="mt-3 text-slate-600 text-sm sm:text-base">初めての釜山でも安心。定番のビーチリゾートから情緒あるレトロ市場まで、個性豊かなエリアを紹介します。</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <!-- Area Card 1 -->
+          <article class="spot-card bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 flex flex-col">
+            <div class="relative h-48 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1548115184-bc6544d06a58?q=80&w=800&auto=format&fit=crop"
+                alt="海雲台ビーチ" class="spot-img w-full h-full object-cover">
+              <span
+                class="absolute top-3 left-3 bg-brand-navy/90 text-white text-xs font-bold px-2.5 py-1 rounded">海・リゾート</span>
+            </div>
+            <div class="p-5 flex-1 flex flex-col">
+              <h3 class="text-lg font-bold text-slate-900 mb-1">海雲台 &amp; 広安里</h3>
+              <p class="text-xs text-brand-blue font-semibold mb-3">ヘウンデ / クァンアンリ</p>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4 flex-1">
+                白砂のロングビーチと広安大橋の夜景が魅力。海沿いの洗練されたカフェやルーフトップバー、オーシャンビューホテルが集結しています。
+              </p>
+              <div class="pt-3 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between">
+                <span><i class="fa-solid fa-train-subway text-slate-400"></i> 地下鉄2号線</span>
+                <span class="font-medium text-brand-orange">ビーチ・夜景</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Area Card 2 -->
+          <article class="spot-card bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 flex flex-col">
+            <div class="relative h-48 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1538485399081-7191377e8241?q=80&w=800&auto=format&fit=crop"
+                alt="南浦洞・チャガルチ市場" class="spot-img w-full h-full object-cover">
+              <span
+                class="absolute top-3 left-3 bg-brand-navy/90 text-white text-xs font-bold px-2.5 py-1 rounded">市場・グルメ</span>
+            </div>
+            <div class="p-5 flex-1 flex flex-col">
+              <h3 class="text-lg font-bold text-slate-900 mb-1">南浦洞 &amp; チャガルチ</h3>
+              <p class="text-xs text-brand-blue font-semibold mb-3">ナンポドン / チャガルチ</p>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4 flex-1">
+                釜山最大の水産市場「チャガルチ市場」や国際市場、BIFF広場の屋台など、昔ながらの活気と昭和レトロな下町情緒が色濃く残る名所です。
+              </p>
+              <div class="pt-3 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between">
+                <span><i class="fa-solid fa-train-subway text-slate-400"></i> 地下鉄1号線</span>
+                <span class="font-medium text-brand-orange">下町・食べ歩き</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Area Card 3 -->
+          <article class="spot-card bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 flex flex-col">
+            <div class="relative h-48 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1580674285054-bed31e145f59?q=80&w=800&auto=format&fit=crop"
+                alt="甘川文化村" class="spot-img w-full h-full object-cover">
+              <span
+                class="absolute top-3 left-3 bg-brand-navy/90 text-white text-xs font-bold px-2.5 py-1 rounded">アート・絶景</span>
+            </div>
+            <div class="p-5 flex-1 flex flex-col">
+              <h3 class="text-lg font-bold text-slate-900 mb-1">甘川文化村</h3>
+              <p class="text-xs text-brand-blue font-semibold mb-3">カムチョン・ムナマウル</p>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4 flex-1">
+                「韓国のマチュピチュ」とも称されるカラフルな階段状の村。路地の壁画アートや展望台、星の王子さまのモニュメントが有名です。
+              </p>
+              <div class="pt-3 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between">
+                <span><i class="fa-solid fa-bus text-slate-400"></i> 土城駅からマウルバス</span>
+                <span class="font-medium text-brand-orange">フォトスポット</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Area Card 4 -->
+          <article class="spot-card bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 flex flex-col">
+            <div class="relative h-48 overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop"
+                alt="西面・田浦カフェ通り" class="spot-img w-full h-full object-cover">
+              <span
+                class="absolute top-3 left-3 bg-brand-navy/90 text-white text-xs font-bold px-2.5 py-1 rounded">ショッピング・カフェ</span>
+            </div>
+            <div class="p-5 flex-1 flex flex-col">
+              <h3 class="text-lg font-bold text-slate-900 mb-1">西面 &amp; 田浦カフェ通り</h3>
+              <p class="text-xs text-brand-blue font-semibold mb-3">ソミョン / チョンポ</p>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4 flex-1">
+                釜山一の繁華街。地下ショッピング街やロッテ百貨店での買い物に加え、個性派カフェや雑貨店が立ち並ぶ「田浦カフェ通り」が人気です。
+              </p>
+              <div class="pt-3 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between">
+                <span><i class="fa-solid fa-train-subway text-slate-400"></i> 地下鉄1・2号線</span>
+                <span class="font-medium text-brand-orange">トレンド・コスメ</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Gourmet Section -->
+    <section id="gourmet" class="py-20 bg-slate-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <span class="text-brand-orange text-xs font-bold tracking-widest uppercase block mb-2 font-en">GOURMET
+            SPECIAL</span>
+          <h2 class="text-3xl font-black text-brand-navy sm:text-4xl tracking-tight">これを食べずに帰れない！釜山必食グルメ</h2>
+          <p class="mt-3 text-slate-600 text-sm sm:text-base">港町ならではの新鮮な海の幸から、地元の人々に愛される滋味深いソウルフードまで厳選してご紹介します。</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+          <!-- Food Item 1 -->
+          <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 flex flex-col">
+            <div class="h-52 overflow-hidden relative">
+              <img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop"
+                alt="デジクッパ" class="w-full h-full object-cover">
+              <span
+                class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded">
+                名物スープ料理
+              </span>
+            </div>
+            <div class="p-6 flex-1 flex flex-col">
+              <div class="flex items-baseline justify-between mb-2">
+                <h3 class="text-xl font-bold text-slate-900">デジクッパ</h3>
+                <span class="text-xs text-slate-500 font-mono">돼지국밥</span>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4 flex-1">
+                じっくり煮込んだ豚骨の濃厚白濁スープに柔らかい豚肉とご飯を入れた釜山を代表する郷土料理。ニラ（プチ）やアミの塩辛を加えて好みの味に調整していただきます。
+              </p>
+              <div class="bg-slate-50 p-3 rounded-lg text-xs space-y-1 border border-slate-150">
+                <div class="flex justify-between"><span class="text-slate-500">辛さレベル</span><span
+                    class="font-semibold text-slate-800">辛くない (調節可能)</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">有名スポット</span><span
+                    class="font-semibold text-slate-800">西面 デジクッパ通り</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Food Item 2 -->
+          <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 flex flex-col">
+            <div class="h-52 overflow-hidden relative">
+              <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800&auto=format&fit=crop"
+                alt="ナッコプセ" class="w-full h-full object-cover">
+              <span
+                class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded">
+                旨辛鍋料理
+              </span>
+            </div>
+            <div class="p-6 flex-1 flex flex-col">
+              <div class="flex items-baseline justify-between mb-2">
+                <h3 class="text-xl font-bold text-slate-900">ナッコプセ</h3>
+                <span class="text-xs text-slate-500 font-mono">낙곱새</span>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4 flex-1">
+                タコ（ナクチ）、牛ホルモン（コプチャン）、エビ（セウ）を特製コチュジャンタレと春雨で炒め煮にしたピリ辛鍋。ご飯の上に韓国海苔と一緒に載せて豪快に混ぜて食べるのが定番。
+              </p>
+              <div class="bg-slate-50 p-3 rounded-lg text-xs space-y-1 border border-slate-150">
+                <div class="flex justify-between"><span class="text-slate-500">辛さレベル</span><span
+                    class="font-semibold text-brand-orange">中辛〜辛口 (甘口指定可)</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">有名スポット</span><span
+                    class="font-semibold text-slate-800">ケミチッ (各支店)</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Food Item 3 -->
+          <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 flex flex-col">
+            <div class="h-52 overflow-hidden relative">
+              <img src="https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=800&auto=format&fit=crop"
+                alt="シアッホットク" class="w-full h-full object-cover">
+              <span
+                class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded">
+                屋台スイーツ
+              </span>
+            </div>
+            <div class="p-6 flex-1 flex flex-col">
+              <div class="flex items-baseline justify-between mb-2">
+                <h3 class="text-xl font-bold text-slate-900">シアッホットク</h3>
+                <span class="text-xs text-slate-500 font-mono">씨앗호떡</span>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4 flex-1">
+                黒糖入りの揚げ焼き生地にハサミで切り込みを入れ、ひまわりの種や松の実、ナッツ類をぎっしり詰め込んだ釜山名物の屋台スイーツ。香ばしい食感と甘じょっぱさが絶妙です。
+              </p>
+              <div class="bg-slate-50 p-3 rounded-lg text-xs space-y-1 border border-slate-150">
+                <div class="flex justify-between"><span class="text-slate-500">辛さレベル</span><span
+                    class="font-semibold text-slate-800">甘い (デザート)</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">有名スポット</span><span
+                    class="font-semibold text-slate-800">南浦洞 BIFF広場</span></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Spot Filter Section -->
+    <section id="spots" class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-10">
+          <span
+            class="text-brand-orange text-xs font-bold tracking-widest uppercase block mb-2 font-en">ATTRACTIONS</span>
+          <h2 class="text-3xl font-black text-brand-navy sm:text-4xl tracking-tight">テーマ別 人気スポット案内</h2>
+          <p class="mt-3 text-slate-600 text-sm sm:text-base">旅のスタイルに合わせて選べるカテゴリ別のおすすめ名所です。</p>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="flex flex-wrap items-center justify-center gap-2 mb-12">
+          <button type="button"
+            class="filter-btn active px-4 py-2 rounded-full text-xs font-bold border border-slate-300 text-slate-700 hover:bg-slate-100"
+            data-filter="all">
+            すべて表示
+          </button>
+          <button type="button"
+            class="filter-btn px-4 py-2 rounded-full text-xs font-bold border border-slate-300 text-slate-700 hover:bg-slate-100"
+            data-filter="nature">
+            海・自然
+          </button>
+          <button type="button"
+            class="filter-btn px-4 py-2 rounded-full text-xs font-bold border border-slate-300 text-slate-700 hover:bg-slate-100"
+            data-filter="gourmet">
+            グルメ・市場
+          </button>
+          <button type="button"
+            class="filter-btn px-4 py-2 rounded-full text-xs font-bold border border-slate-300 text-slate-700 hover:bg-slate-100"
+            data-filter="culture">
+            歴史・文化
+          </button>
+          <button type="button"
+            class="filter-btn px-4 py-2 rounded-full text-xs font-bold border border-slate-300 text-slate-700 hover:bg-slate-100"
+            data-filter="shopping">
+            ショッピング
+          </button>
+        </div>
+
+        <!-- Spots Grid -->
+        <div id="spot-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          <!-- Spot 1: 海雲台ブルーラインパーク -->
+          <div class="spot-item" data-category="nature">
+            <div class="spot-card bg-slate-50 rounded-xl overflow-hidden border border-slate-200">
+              <div class="h-44 overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=800&auto=format&fit=crop"
+                  alt="海雲台ブルーラインパーク" class="spot-img w-full h-full object-cover">
+              </div>
+              <div class="p-4">
+                <div class="flex justify-between items-start mb-1">
+                  <h4 class="text-base font-bold text-slate-900">海雲台ブルーラインパーク</h4>
+                  <span class="text-xs bg-blue-100 text-brand-blue font-semibold px-2 py-0.5 rounded">海・自然</span>
+                </div>
+                <p class="text-xs text-slate-500 mb-2 font-mono">해운대 블루라인파크 (スカイカプセル)</p>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  旧東海南部線の廃線跡を利用した観光列車＆スカイカプセル。海岸絶壁のすぐそばを走りながら釜山の美しい海をパノラマで堪能できます。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Spot 2: 海東龍宮寺 -->
+          <div class="spot-item" data-category="culture nature">
+            <div class="spot-card bg-slate-50 rounded-xl overflow-hidden border border-slate-200">
+              <div class="h-44 overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1578637387939-43c525550085?q=80&w=800&auto=format&fit=crop"
+                  alt="海東龍宮寺" class="spot-img w-full h-full object-cover">
+              </div>
+              <div class="p-4">
+                <div class="flex justify-between items-start mb-1">
+                  <h4 class="text-base font-bold text-slate-900">海東龍宮寺 (ヘドンヨングンサ)</h4>
+                  <span class="text-xs bg-emerald-100 text-emerald-700 font-semibold px-2 py-0.5 rounded">歴史・文化</span>
+                </div>
+                <p class="text-xs text-slate-500 mb-2 font-mono">해동용궁사</p>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  韓国でも珍しい海岸の岩場に建てられた名刹。「真心を込めて祈れば誰でも必ず一つの願いが叶う」と言われる屈指のパワースポットです。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Spot 3: チャガルチ市場 -->
+          <div class="spot-item" data-category="gourmet culture">
+            <div class="spot-card bg-slate-50 rounded-xl overflow-hidden border border-slate-200">
+              <div class="h-44 overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=800&auto=format&fit=crop"
+                  alt="チャガルチ市場" class="spot-img w-full h-full object-cover">
+              </div>
+              <div class="p-4">
+                <div class="flex justify-between items-start mb-1">
+                  <h4 class="text-base font-bold text-slate-900">チャガルチ市場</h4>
+                  <span class="text-xs bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded">グルメ・市場</span>
+                </div>
+                <p class="text-xs text-slate-500 mb-2 font-mono">자갈치시장</p>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  1階で活魚やアワビ・カニを選び、2階の食堂ですぐに刺身や焼き物として調理してもらえる体験が人気。港町釜山の活気を肌で感じられます。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Spot 4: 白瀬文化村 (ヒンヨウル文化村) -->
+          <div class="spot-item" data-category="culture nature">
+            <div class="spot-card bg-slate-50 rounded-xl overflow-hidden border border-slate-200">
+              <div class="h-44 overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop"
+                  alt="ヒンヨウル文化村" class="spot-img w-full h-full object-cover">
+              </div>
+              <div class="p-4">
+                <div class="flex justify-between items-start mb-1">
+                  <h4 class="text-base font-bold text-slate-900">ヒンヨウル文化村</h4>
+                  <span class="text-xs bg-cyan-100 text-cyan-800 font-semibold px-2 py-0.5 rounded">海・自然</span>
+                </div>
+                <p class="text-xs text-slate-500 mb-2 font-mono">흰여울문화마을</p>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  影島（ヨンド）の海沿い崖に広がる白い壁の集落。「韓国のサントリーニ」とも呼ばれ、青い海を眺めるオーシャンビューカフェが点在しています。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Spot 5: 新世界センタムシティ -->
+          <div class="spot-item" data-category="shopping">
+            <div class="spot-card bg-slate-50 rounded-xl overflow-hidden border border-slate-200">
+              <div class="h-44 overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?q=80&w=800&auto=format&fit=crop"
+                  alt="新世界センタムシティ" class="spot-img w-full h-full object-cover">
+              </div>
+              <div class="p-4">
+                <div class="flex justify-between items-start mb-1">
+                  <h4 class="text-base font-bold text-slate-900">新世界センタムシティ</h4>
+                  <span class="text-xs bg-purple-100 text-purple-800 font-semibold px-2 py-0.5 rounded">ショッピング</span>
+                </div>
+                <p class="text-xs text-slate-500 mb-2 font-mono">신세계 센텀시티</p>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ギネス世界記録にも認定された世界最大のデパート。高級ブランドから韓国人気コスメ、巨大なスパランド（チムジルバン）まで備えています。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Spot 6: 広安里ビーチ & ドローンショー -->
+          <div class="spot-item" data-category="nature">
+            <div class="spot-card bg-slate-50 rounded-xl overflow-hidden border border-slate-200">
+              <div class="h-44 overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=800&auto=format&fit=crop"
+                  alt="広安里ビーチ" class="spot-img w-full h-full object-cover">
+              </div>
+              <div class="p-4">
+                <div class="flex justify-between items-start mb-1">
+                  <h4 class="text-base font-bold text-slate-900">広安里 (クァンアンリ) ビーチ</h4>
+                  <span class="text-xs bg-blue-100 text-brand-blue font-semibold px-2 py-0.5 rounded">海・自然</span>
+                </div>
+                <p class="text-xs text-slate-500 mb-2 font-mono">광안리 해수욕장</p>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  毎週土曜の夜には広安大橋を背景に常設の「Mドローンライトショー」が開催。砂浜沿いのパブやカフェでビールを片手に鑑賞するのがおすすめ。
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Travel Tips & Japanese Specific Section -->
+    <section id="tips" class="py-20 bg-slate-100 border-t border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <span class="text-brand-orange text-xs font-bold tracking-widest uppercase block mb-2 font-en">TRAVEL
+            ESSENTIALS</span>
+          <h2 class="text-3xl font-black text-brand-navy sm:text-4xl tracking-tight">日本人旅行者のための安心お役立ちガイド</h2>
+          <p class="mt-3 text-slate-600 text-sm sm:text-base">初めての韓国・釜山旅行でも安心。交通系カード、移動手段、指差しで使える韓国語フレーズをまとめました。</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+
+          <!-- Card 1: 決済・交通カード (WOWPASS / T-money) -->
+          <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-3 mb-4">
+              <div
+                class="w-10 h-10 rounded-lg bg-orange-100 text-brand-orange flex items-center justify-center text-lg">
+                <i class="fa-solid fa-credit-card"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-slate-900">WOWPASS &amp; 交通系カード事情</h3>
+                <span class="text-xs text-slate-500 font-medium">キャッシュレス大国の韓国旅行に必須</span>
+              </div>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+              韓国は完全キャッシュレス社会です。日本円をチャージしてそのままウォン決済ができる「WOWPASS」なら、T-money（交通IC）機能も付いているため地下鉄・バスの乗り降りもスムーズです。
+            </p>
+            <div class="space-y-2 text-xs text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-150">
+              <div class="flex items-start gap-2">
+                <i class="fa-solid fa-check text-emerald-600 mt-0.5"></i>
+                <span><strong>チャージ場所:</strong> 金海空港国際線到着ロビー、西面駅、釜山駅などの無人機</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <i class="fa-solid fa-check text-emerald-600 mt-0.5"></i>
+                <span><strong>交通機能の注意点:</strong> 地下鉄の券売機にて「現金（ウォン）」でのみチャージ可能</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <i class="fa-solid fa-check text-emerald-600 mt-0.5"></i>
+                <span><strong>クレカ利用:</strong> VISA / Mastercardなら屋台を除くほぼ全店舗で利用可能</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: 釜山市内の移動手段 -->
+          <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-lg bg-blue-100 text-brand-blue flex items-center justify-center text-lg">
+                <i class="fa-solid fa-train-subway"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-slate-900">市内交通機関の乗り方</h3>
+                <span class="text-xs text-slate-500 font-medium">地下鉄・タクシー・バスの使い分け</span>
+              </div>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+              釜山市内は地下鉄1号線〜4号線が整備されており、主要観光地のほとんどへアクセス可能です。タクシーも日本より初乗り料金が手頃で気軽に利用できます。
+            </p>
+            <div class="space-y-2 text-xs text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-150">
+              <div class="flex items-start gap-2">
+                <i class="fa-solid fa-circle-info text-brand-blue mt-0.5"></i>
+                <span><strong>地下鉄:</strong> 日本語の案内表記・車内アナウンスあり（初乗り約1,450ウォン）</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <i class="fa-solid fa-circle-info text-brand-blue mt-0.5"></i>
+                <span><strong>タクシー配車:</strong> 「カカオT」または「Uber（Uber Taxi）」が日本語で利用可能</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <i class="fa-solid fa-circle-info text-brand-blue mt-0.5"></i>
+                <span><strong>マップアプリ:</strong> Google Mapより「NAVERマップ」の日本語設定が推奨</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Korean Phrases for Travelers -->
+        <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">飲食店・買い物で役立つ韓国語フレーズ</h3>
+              <p class="text-xs text-slate-500 mt-1">ワンクリックでコピー可能。スマホで見せながらの注文にも使えます。</p>
+            </div>
+            <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium hidden sm:inline-block">
+              指差し会話カード
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+            <!-- Phrase 1 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+              <div>
+                <span class="text-xs text-slate-400 font-semibold block mb-1">注文する時</span>
+                <p class="korean-text text-base font-bold text-slate-900 mb-1">이거 주세요</p>
+                <p class="text-xs text-slate-500 mb-1">イゴ ジュセヨ</p>
+                <p class="text-xs text-brand-navy font-medium">「これください」</p>
+              </div>
+              <button type="button"
+                class="copy-btn mt-3 w-full py-1.5 px-3 rounded-lg border border-slate-300 text-xs text-slate-600 font-semibold flex items-center justify-center gap-1.5"
+                data-default-text="コピー">
+                <i class="fa-regular fa-copy"></i> <span>コピー</span>
+              </button>
+            </div>
+
+            <!-- Phrase 2 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+              <div>
+                <span class="text-xs text-slate-400 font-semibold block mb-1">辛さ控えめ</span>
+                <p class="korean-text text-base font-bold text-slate-900 mb-1">안 맵게 해주세요</p>
+                <p class="text-xs text-slate-500 mb-1">アン メプケ ヘジュセヨ</p>
+                <p class="text-xs text-brand-navy font-medium">「辛くしないでください」</p>
+              </div>
+              <button type="button"
+                class="copy-btn mt-3 w-full py-1.5 px-3 rounded-lg border border-slate-300 text-xs text-slate-600 font-semibold flex items-center justify-center gap-1.5"
+                data-default-text="コピー">
+                <i class="fa-regular fa-copy"></i> <span>コピー</span>
+              </button>
+            </div>
+
+            <!-- Phrase 3 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+              <div>
+                <span class="text-xs text-slate-400 font-semibold block mb-1">お会計</span>
+                <p class="korean-text text-base font-bold text-slate-900 mb-1">계산해 주세요</p>
+                <p class="text-xs text-slate-500 mb-1">ケサネ ジュセヨ</p>
+                <p class="text-xs text-brand-navy font-medium">「お会計お願いします」</p>
+              </div>
+              <button type="button"
+                class="copy-btn mt-3 w-full py-1.5 px-3 rounded-lg border border-slate-300 text-xs text-slate-600 font-semibold flex items-center justify-center gap-1.5"
+                data-default-text="コピー">
+                <i class="fa-regular fa-copy"></i> <span>コピー</span>
+              </button>
+            </div>
+
+            <!-- Phrase 4 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+              <div>
+                <span class="text-xs text-slate-400 font-semibold block mb-1">場所の確認</span>
+                <p class="korean-text text-base font-bold text-slate-900 mb-1">화장실 어디예요?</p>
+                <p class="text-xs text-slate-500 mb-1">ファジャンシル オディエヨ?</p>
+                <p class="text-xs text-brand-navy font-medium">「トイレはどこですか？」</p>
+              </div>
+              <button type="button"
+                class="copy-btn mt-3 w-full py-1.5 px-3 rounded-lg border border-slate-300 text-xs text-slate-600 font-semibold flex items-center justify-center gap-1.5"
+                data-default-text="コピー">
+                <i class="fa-regular fa-copy"></i> <span>コピー</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Accordion Section -->
+    <section id="faq" class="py-20 bg-white">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <span class="text-brand-orange text-xs font-bold tracking-widest uppercase block mb-2 font-en">Q &amp;
+            A</span>
+          <h2 class="text-3xl font-black text-brand-navy sm:text-4xl tracking-tight">よくある質問 (FAQ)</h2>
+          <p class="mt-3 text-slate-600 text-sm sm:text-base">釜山旅行の前に日本人旅行者からよく寄せられる質問をまとめました。</p>
+        </div>
+
+        <div class="space-y-4">
+
+          <!-- FAQ 1 -->
+          <div class="faq-item border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+            <button type="button"
+              class="faq-header w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-slate-900 hover:bg-slate-100 transition-colors">
+              <span class="flex items-center gap-3">
+                <span
+                  class="w-6 h-6 rounded-full bg-brand-navy text-white text-xs flex items-center justify-center font-bold">Q</span>
+                <span>両替は日本と釜山のどちらでするのがお得ですか？</span>
+              </span>
+              <i class="faq-icon fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+            </button>
+            <div class="faq-content px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <div class="pt-2 border-t border-slate-200">
+                釜山到着後に両替する方が圧倒的にお得です。特に南浦洞の公認両替所（マネーボックスなど）や西面駅周辺のレートが良好です。また、日本円の現金を直接機械に入れてウォン残高としてチャージできるWOWPASS無人機を利用するのもおすすめです。
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 2 -->
+          <div class="faq-item border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+            <button type="button"
+              class="faq-header w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-slate-900 hover:bg-slate-100 transition-colors">
+              <span class="flex items-center gap-3">
+                <span
+                  class="w-6 h-6 rounded-full bg-brand-navy text-white text-xs flex items-center justify-center font-bold">Q</span>
+                <span>コンセントの形状や変圧器は必要ですか？</span>
+              </span>
+              <i class="faq-icon fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+            </button>
+            <div class="faq-content px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <div class="pt-2 border-t border-slate-200">
+                韓国のコンセントは「SEタイプ」または「Cタイプ」で、電圧は220Vです。日本の平型プラグ（Aタイプ・100V）とは異なるため、変換プラグ（丸ピン2本）が必要です。スマホやPC、デジカメの充電器は100-240V対応のものが多いため変圧器は不要ですが、日本専用のヘアアイロンやドライヤーは変圧器が必要です。
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 3 -->
+          <div class="faq-item border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+            <button type="button"
+              class="faq-header w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-slate-900 hover:bg-slate-100 transition-colors">
+              <span class="flex items-center gap-3">
+                <span
+                  class="w-6 h-6 rounded-full bg-brand-navy text-white text-xs flex items-center justify-center font-bold">Q</span>
+                <span>日本語は通じますか？英語が必要でしょうか？</span>
+              </span>
+              <i class="faq-icon fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+            </button>
+            <div class="faq-content px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <div class="pt-2 border-t border-slate-200">
+                南浦洞やチャガルチ市場、海雲台の大型ホテル、免税店では日本語を話せるスタッフが多くいます。地下鉄の案内板や車内アナウンスも日本語に対応しています。個人経営のカフェやローカル食堂では通じない場合もありますが、Papagoなどの翻訳アプリや指差し注文で問題なく旅ができます。
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 4 -->
+          <div class="faq-item border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+            <button type="button"
+              class="faq-header w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-slate-900 hover:bg-slate-100 transition-colors">
+              <span class="flex items-center gap-3">
+                <span
+                  class="w-6 h-6 rounded-full bg-brand-navy text-white text-xs flex items-center justify-center font-bold">Q</span>
+                <span>金海国際空港から市内へのアクセスは？</span>
+              </span>
+              <i class="faq-icon fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+            </button>
+            <div class="faq-content px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <div class="pt-2 border-t border-slate-200">
+                空港直結の「釜山-金海軽電鉄」に乗車し、沙上（ササン）駅で地下鉄2号線に乗り換えると西面（ソミョン）まで約30分、海雲台まで約1時間です。荷物が多い場合や複数人の場合はタクシー利用も便利で、西面まで約15,000〜20,000ウォン程度です。
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-brand-navy text-slate-300 pt-16 pb-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+        <div class="md:col-span-2">
+          <div class="flex items-center gap-2 mb-4">
+            <i class="fa-solid fa-water text-xl text-brand-orange"></i>
+            <span class="text-xl font-bold text-white tracking-tight font-en">VISIT BUSAN</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed max-w-sm mb-4">
+            海と都心が共鳴する魅力あふれる港町、釜山。日本人の皆様が安全で快適な旅を楽しめるよう、最新で正確な観光情報をお届けします。
+          </p>
+          <div class="text-xs text-slate-400 space-y-1">
+            <p><i class="fa-solid fa-phone text-brand-orange mr-1.5"></i> 韓国観光公社 観光案内電話: 1330 (日本語可・無料・24時間)</p>
+            <p><i class="fa-solid fa-building-flag text-brand-orange mr-1.5"></i> 在釜山日本国総領事館: +82-51-465-5101</p>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4 font-en">QUICK LINKS</h4>
+          <ul class="space-y-2 text-xs">
+            <li><a href="#areas" class="hover:text-white transition-colors">エリア案内</a></li>
+            <li><a href="#gourmet" class="hover:text-white transition-colors">釜山グルメ特集</a></li>
+            <li><a href="#spots" class="hover:text-white transition-colors">人気スポット検索</a></li>
+            <li><a href="#tips" class="hover:text-white transition-colors">WOWPASS・交通カード</a></li>
+            <li><a href="#faq" class="hover:text-white transition-colors">よくある質問</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4 font-en">EXTERNAL LINKS</h4>
+          <ul class="space-y-2 text-xs">
+            <li><a href="https://japanese.visitkorea.or.kr/" target="_blank" rel="noopener noreferrer"
+                class="hover:text-white transition-colors flex items-center gap-1.5">VISIT KOREA (公式) <i
+                  class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a></li>
+            <li><a href="https://bto.or.kr/" target="_blank" rel="noopener noreferrer"
+                class="hover:text-white transition-colors flex items-center gap-1.5">釜山観光公社 <i
+                  class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a></li>
+            <li><a href="https://www.humetro.busan.kr/" target="_blank" rel="noopener noreferrer"
+                class="hover:text-white transition-colors flex items-center gap-1.5">釜山交通公社 (地下鉄) <i
+                  class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div
+        class="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <p>&copy; 2026 VISIT BUSAN Guide for Japanese Travelers. All rights reserved.</p>
+        <p>Published with semantic standards &amp; responsive architecture.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll To Top Button -->
+  <button type="button" id="scroll-top-btn"
+    class="fixed bottom-6 right-6 z-30 w-11 h-11 rounded-full bg-brand-navy hover:bg-brand-blue text-white shadow-lg flex items-center justify-center transition-all"
+    aria-label="トップへスクロール">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- jQuery CDN -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <!-- Custom JS -->
+  <script src="assets/js/main.js"></script>
+</body>
+
+</html>

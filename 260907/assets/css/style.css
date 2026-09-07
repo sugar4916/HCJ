@@ -1,0 +1,162 @@
+@charset "UTF-8";
+
+/* 
+ * Project: VISIT BUSAN - 日本人向け釜山旅行ガイド
+ * Author: 10年目 ウェブパブリッシャー
+ * Description: セマンティックマークアップに最適化されたカスタムスタイルシート
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Outfit:wght@400;600;700&display=swap');
+
+:root {
+  --color-primary: #0F3B60;
+  --color-primary-light: #1A5F9E;
+  --color-secondary: #E36414;
+  --color-accent: #00A896;
+  --color-bg-light: #F8FAFC;
+  --color-text-main: #1E293B;
+  --color-text-muted: #64748B;
+  --color-border: #E2E8F0;
+  --color-white: #FFFFFF;
+  --font-family-base: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+  --font-family-en: 'Outfit', sans-serif;
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+}
+
+/* Base Styles */
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-family-base);
+  color: var(--color-text-main);
+  background-color: var(--color-bg-light);
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-en {
+  font-family: var(--font-family-en);
+}
+
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* Header & Navigation */
+#main-header {
+  transition: background-color var(--transition-normal), box-shadow var(--transition-normal), backdrop-filter var(--transition-normal);
+}
+
+#main-header.scrolled {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
+}
+
+#main-header.scrolled .nav-link {
+  color: var(--color-text-main);
+}
+
+#main-header.scrolled .logo-text {
+  color: var(--color-primary);
+}
+
+/* Hero Section */
+.hero-overlay {
+  background: linear-gradient(180deg, rgba(15, 59, 96, 0.65) 0%, rgba(15, 59, 96, 0.85) 100%);
+}
+
+/* Spot Card */
+.spot-card {
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.spot-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+
+.spot-card .spot-img {
+  transition: transform 0.5s ease;
+}
+
+.spot-card:hover .spot-img {
+  transform: scale(1.05);
+}
+
+/* Category Filter Tabs */
+.filter-btn {
+  transition: all var(--transition-fast);
+}
+
+.filter-btn.active {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+}
+
+/* FAQ Accordion */
+.faq-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease-out, opacity 0.3s ease;
+  opacity: 0;
+}
+
+.faq-item.active .faq-content {
+  max-height: 300px;
+  opacity: 1;
+}
+
+.faq-item.active .faq-icon {
+  transform: rotate(180deg);
+}
+
+/* Phrase Copy Button */
+.copy-btn {
+  transition: all var(--transition-fast);
+}
+
+.copy-btn:hover {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+/* Scroll To Top */
+#scroll-top-btn {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+}
+
+#scroll-top-btn.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Mobile Nav Drawer */
+#mobile-menu {
+  transition: transform var(--transition-normal), opacity var(--transition-normal);
+}
