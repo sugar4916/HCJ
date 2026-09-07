@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif;
+    background: linear-gradient(135deg, #eaf2fb 0%, #dceafb 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .page {
+    width: 800px;
+    max-width: 100%;
+  }
+
+  /* 상단 타이틀 */
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .title h1 {
+    font-size: 40px;
+    font-weight: 800;
+    color: #1e5fa8;
+    letter-spacing: 1px;
+  }
+  .title .line {
+    flex: 1;
+    height: 2px;
+    background: #1e5fa8;
+  }
+
+  /* 전체 카드 */
+  .card {
+    background: #fff;
+    border-radius: 28px;
+    padding: 32px;
+    box-shadow: 0 10px 30px rgba(30, 95, 168, 0.12);
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+  }
+
+  /* 왼쪽: 사진 + 이름 */
+  .left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .photo-wrap {
+    position: relative;
+    width: 100%;
+  }
+
+  .badge {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    background: #2b6cb0;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 10px 8px;
+    border-radius: 10px;
+    line-height: 1.4;
+    writing-mode: vertical-rl;
+    z-index: 2;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+
+  .photo {
+  width: 100%;
+  aspect-ratio: 3/4;
+  border-radius: 18px;
+  object-fit: cover;
+  object-position: 50% 20%;   /* 앞: 가로 위치, 뒤: 세로 위치 */
+  background: #cfe0f5;
+  ...
+}
+
+  .name {
+    margin-top: 16px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #1a1a1a;
+  }
+  .name-sub {
+    font-size: 12px;
+    color: #8a8a8a;
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  .dots {
+    width: 60%;
+    border-top: 2px dotted #cfd8e3;
+    margin: 14px 0;
+  }
+
+  .comment {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.6;
+  }
+
+  /* 오른쪽 상단: 정보 + 소개 */
+  .right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .info-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .box {
+    background: #f4f8fd;
+    border-radius: 18px;
+    padding: 20px;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #333;
+    margin-bottom: 14px;
+  }
+  .info-row:last-child { margin-bottom: 0; }
+  .info-row .icon {
+    width: 20px; height: 20px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #2b6cb0;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+
+  .label-col {
+    width: 78px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .label-col .label {
+    font-weight: 700;
+    color: #1e5fa8;
+    white-space: nowrap;
+  }
+  .label-col .label-jp {
+    font-size: 10.5px;
+    color: #9aa5b4;
+    margin-top: 1px;
+    white-space: nowrap;
+  }
+
+  .value-col {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+  }
+  .value-col .value-kr {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .value-col .value-jp {
+    font-size: 11px;
+    color: #9aa5b4;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .intro-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: #1e5fa8;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  .intro-title .icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #2b6cb0;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .intro-text {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.7;
+  }
+  .intro-text .jp {
+    display: block;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #d8e2ee;
+    color: #9aa5b4;
+    font-size: 12px;
+  }
+
+  /* 하단: 관심사 3개 카드 */
+  .hobbies {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .hobby-card {
+    background: #f4f8fd;
+    border-radius: 16px;
+    overflow: hidden;
+    padding-bottom: 14px;
+  }
+
+  .hobby-img {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: linear-gradient(135deg, #bcd6f2, #8fb8e6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+  }
+
+  .hobby-num {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px; height: 22px;
+    background: #2b6cb0;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hobby-label {
+    background: #2b6cb0;
+    color: #fff;
+    text-align: center;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 8px 0;
+    margin: 12px 12px 8px 12px;
+    border-radius: 8px;
+  }
+
+  .hobby-desc {
+    text-align: center;
+    font-size: 11px;
+    color: #777;
+    padding: 0 12px;
+    line-height: 1.5;
+  }
+  .hobby-desc .jp {
+    display: inline-block;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #d8e2ee;
+    color: #9aa5b4;
+    font-size: 10.5px;
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 20px 14px; }
+
+    .title { margin-bottom: 16px; }
+    .title h1 { font-size: 28px; }
+
+    .card {
+      grid-template-columns: 1fr;
+      padding: 20px;
+      border-radius: 20px;
+      gap: 20px;
+    }
+
+    /* 왼쪽 프로필 영역: 사진을 작게, 옆에 이름 배치 */
+    .left {
+      flex-direction: row;
+      align-items: center;
+      text-align: left;
+      gap: 16px;
+    }
+    .photo-wrap { width: 100px; flex-shrink: 0; }
+    .badge {
+      font-size: 10px;
+      top: -6px; left: -6px;
+      padding: 6px 5px;
+    }
+    .name { margin-top: 0; font-size: 18px; }
+    .name-sub { font-size: 11px; }
+    .dots { display: none; }
+    .comment { display: none; } /* 모바일에서는 인사말 생략, 필요하면 삭제 */
+
+    .info-intro { grid-template-columns: 1fr; gap: 12px; }
+    .box { padding: 16px; border-radius: 14px; }
+    .info-row { font-size: 12.5px; margin-bottom: 10px; }
+    .label-col { width: 62px; }
+
+    .intro-text { font-size: 13px; line-height: 1.6; }
+
+    .hobbies {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .hobby-card {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      align-items: center;
+      padding-bottom: 0;
+      padding: 10px;
+      gap: 12px;
+    }
+    .hobby-img {
+      aspect-ratio: 1/1;
+      border-radius: 10px;
+      font-size: 10px;
+    }
+    .hobby-num { width: 18px; height: 18px; font-size: 10px; }
+    .hobby-label {
+      margin: 0 0 4px 0;
+      font-size: 12px;
+      padding: 5px 0;
+      border-radius: 6px;
+    }
+    .hobby-desc {
+      text-align: left;
+      padding: 0;
+      font-size: 11px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .left { flex-direction: column; text-align: center; }
+    .photo-wrap { width: 130px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="title">
+    <h1>Profile</h1>
+    <div class="line"></div>
+  </div>
+
+  <div class="card">
+
+    <!-- 왼쪽: 사진 영역 -->
+    <div class="left">
+      <div class="photo-wrap">
+        <div class="badge">자기소개</div>
+        <!-- 실제 사진으로 교체: <img class="photo" src="본인사진.jpg" alt="프로필 사진"> -->
+        <img class="photo" src="보민 프로필사진 (2).jpg" alt="프로필 사진">
+      </div>
+      <div class="name">김 보 민</div>
+      <div class="name-sub">Kim Bo Min</div>
+      <div class="dots"></div>
+      <div class="comment">
+        문제 해결에 집중하는 개발자입니다.<br>
+        결과로 신뢰를 만들어갑니다.
+      </div>
+    </div>
+
+    <!-- 오른쪽: 정보 + 소개 -->
+    <div class="right">
+      <div class="info-intro">
+        <div class="box">
+          <div class="info-row">
+            <span class="icon">📅</span>
+            <div class="label-col">
+              <span class="label">생년월일</span>
+              <span class="label-jp">生年月日</span>
+            </div>
+            <div class="value-col">
+              <span class="value-kr">2003년 02월 17일</span>
+              <span class="value-jp">2003年02月17日</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="icon">📍</span>
+            <div class="label-col">
+              <span class="label">출신지</span>
+              <span class="label-jp">出身地</span>
+            </div>
+            <div class="value-col">
+              <span class="value-kr">부산광역시</span>
+              <span class="value-jp">釜山広域市</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="icon">🏢</span>
+            <div class="label-col">
+              <span class="label">소속</span>
+              <span class="label-jp">所属</span>
+            </div>
+            <div class="value-col">
+              <span class="value-kr">일어일문학과 · 광고홍보학과(복수전공)</span>
+              <span class="value-jp">日本語日文学科・広告広報学科(ダブルメジャー)</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="icon">✨</span>
+            <div class="label-col">
+              <span class="label">취미</span>
+              <span class="label-jp">趣味</span>
+            </div>
+            <div class="value-col">
+              <span class="value-kr">뜨개질, 여행, 컨텐츠 보기</span>
+              <span class="value-jp">編み物、旅行、コンテンツ鑑賞</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="box">
+          <div class="intro-title">
+            <span class="icon">💡</span>
+            <span>개발자 소개</span>
+          </div>
+          <div class="intro-text">
+            안녕하세요, 개발자 김보민입니다. 문제의 원인을 끝까지 파고들며, 새로운 기술은 직접 부딪히며 익히는 것을 선호합니다.
+            말보다 결과물로 신뢰를 쌓고, 코드와 문서로 명확하게 소통하려 노력합니다. 일본 교환학생 경험과 JLPT N2를 바탕으로
+            일본어 기술 문서 소통 및 글로벌 프로젝트 참여가 가능하며, 부산 IT 생태계에서 실력으로 인정받는 개발자가 되겠습니다.
+            <span class="jp">
+            はじめまして、開発者のキム・ボミンです。問題の原因を最後まで追求し、新しい技術は実際に使いながら習得することを好みます。
+            言葉より成果物で信頼を築き、コードやドキュメントで明確に伝えることを大切にしています。日本への交換留学経験とJLPT N2を活かし、
+            日本語の技術文書対応やグローバルプロジェクトにも柔軟に参加でき、釜山を拠点に実力で認められる開発者を目指します。
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단 관심사 카드 -->
+      <div class="hobbies">
+        <div class="hobby-card">
+          <div class="hobby-img">
+            日本語
+            <span class="hobby-num">1</span>
+          </div>
+          <div class="hobby-label">일본어</div>
+          <div class="hobby-desc">
+            JLPT N2 취득, 니시난가쿠인대학(西南学院大学) 교환학생 경험을 바탕으로<br>
+            실무에 바로 활용 가능한 일본어 구사력을 갖췄습니다.<br>
+            <span class="jp">JLPT N2取得、西南学院大学への交換留学経験を活かし、<br>
+            実務で使える日本語力を身につけています。</span>
+          </div>
+        </div>
+
+        <div class="hobby-card">
+          <div class="hobby-img">
+            IT・AI
+            <span class="hobby-num">2</span>
+          </div>
+          <div class="hobby-label">IT</div>
+          <div class="hobby-desc">
+            2026 일본 IT・AI 전문인력 양성과정(KS Global 23기)에 참여하며<br>
+            IT・AI 분야 실무 역량을 쌓아가고 있습니다.<br>
+            <span class="jp">2026年 日本IT・AI専門人材養成課程(KS Global 23期)に参加し、<br>
+            IT・AI分野の実務能力を身につけています。</span>
+          </div>
+        </div>
+
+        <div class="hobby-card">
+          <div class="hobby-img">
+            Ai / Ps / Pr
+            <span class="hobby-num">3</span>
+          </div>
+          <div class="hobby-label">어도비</div>
+          <div class="hobby-desc">
+            Premiere, Photoshop, InDesign 등 Adobe 툴을 활용해<br>
+            영상·이미지·편집 콘텐츠를 직접 제작할 수 있습니다.<br>
+            <span class="jp">Premiere・Photoshop・InDesignなどAdobeツールを活用し、<br>
+            映像・画像・編集コンテンツを制作できます。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
