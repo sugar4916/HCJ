@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart GIF Studio - Free GIF Editor</title>
+
+  <!-- Pretendard 폰트 & FontAwesome 아이콘 라이브러리 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- GIF 파싱 및 실시간 인코딩 라이브러리 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/omggif/1.0.10/omggif.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1e293b;
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(199, 210, 254, 0.75) 0%, rgba(243, 232, 255, 0.45) 30%, rgba(254, 242, 242, 0.1) 60%),
+        linear-gradient(135deg, #f0f7ff 0%, #f5f3ff 50%, #fef2f2 100%);
+      background-attachment: fixed;
+    }
+
+    /* 상단 헤더 */
+    header {
+      width: 100%;
+      height: 72px;
+      padding: 0 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      z-index: 100;
+    }
+
+    .header-logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      height: 38px;
+      object-fit: contain;
+    }
+
+    .logo-fallback {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #4f46e5;
+      display: none;
+    }
+
+    .site-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* 메인 컨테이너 */
+    main {
+      flex: 1;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* 영문 헤더 및 보안 안내 */
+    .hero-section {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 820px;
+      margin: 0 auto;
+      transition: all 0.3s ease;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: #475569;
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+
+    .security-notice-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(240, 253, 244, 0.85);
+      border: 1px solid #bbf7d0;
+      color: #15803d;
+      padding: 12px 20px;
+      border-radius: 100px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-top: 4px;
+      box-shadow: 0 4px 12px rgba(22, 163, 74, 0.06);
+    }
+
+    /* 업로드 카드 */
+    .dropzone-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 2px dashed #a5b4fc;
+      border-radius: 28px;
+      padding: 56px 24px;
+      text-align: center;
+      box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 820px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .dropzone-card:hover, .dropzone-card.dragover {
+      border-color: #6366f1;
+      background: rgba(255, 255, 255, 0.95);
+      transform: translateY(-2px);
+      box-shadow: 0 25px 50px -10px rgba(99, 102, 241, 0.18),
+                  0 0 0 2px #6366f1;
+    }
+
+    .dropzone-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6366f1;
+      font-size: 1.8rem;
+    }
+
+    .dropzone-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .dropzone-sub {
+      font-size: 0.92rem;
+      color: #64748b;
+      margin-bottom: 28px;
+    }
+
+    .btn-choose {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      padding: 15px 36px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+      transition: all 0.25s ease;
+    }
+
+    .btn-choose:hover {
+      background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(79, 70, 229, 0.4);
+    }
+
+    #gif-file-input { display: none; }
+
+    /* ==========================================
+       GIF 편집 대시보드 레이아웃
+       ========================================== */
+    .editor-layout {
+      display: none;
+      gap: 20px;
+      width: 100%;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @media (min-width: 861px) {
+      .editor-layout {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+
+      .preview-side-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        flex: 1.2;
+        position: sticky;
+        top: 96px;
+      }
+
+      .gif-controls-panel {
+        flex: 1;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .editor-layout {
+        flex-direction: column;
+      }
+
+      .preview-side-container,
+      .gif-controls-panel {
+        width: 100%;
+      }
+    }
+
+    .panel-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .panel-card.collapsed .panel-body {
+      display: none;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-toggle-panel {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-toggle-panel:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-download:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-change-file {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 8px 14px;
+      border-radius: 100px;
+      color: #475569;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-change-file:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .panel-body {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .gif-display-box {
+      width: 100%;
+      background: transparent;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    .gif-display-box img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 18px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .info-card-item {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .info-card-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-card-value {
+      font-size: 1rem;
+      font-weight: 900;
+      color: #0f172a;
+    }
+
+    /* Editor Tools 9가지 버튼 그리드 */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 500px) {
+      .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .tool-btn {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 18px;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      outline: none;
+    }
+
+    .tool-btn:hover {
+      border-color: #6366f1;
+      background: #f5f3ff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.2);
+    }
+
+    .tool-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      transition: all 0.2s ease;
+    }
+
+    .tool-label {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    /* ==========================================
+       각 Sub-Tool 전용 제어 패널 UI
+       ========================================== */
+    .sub-tool-panel {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .tool-controls-box {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 20px;
+    }
+
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-row-label {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #334155;
+    }
+
+    .pill-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill-btn {
+      flex: 1;
+      min-width: 80px;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .pill-btn.active {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+    }
+
+    .checkbox-item input {
+      width: 18px;
+      height: 18px;
+      accent-color: #6366f1;
+      cursor: pointer;
+    }
+
+    .axis-control-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .axis-label {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #334155;
+      width: 50px;
+    }
+
+    .slider-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      height: 8px;
+      border-radius: 100px;
+      background: #e2e8f0;
+      outline: none;
+      accent-color: #6366f1;
+      cursor: pointer;
+    }
+
+    .axis-val-badge {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #4f46e5;
+      background: #e0e7ff;
+      padding: 4px 12px;
+      border-radius: 100px;
+      min-width: 68px;
+      text-align: center;
+    }
+
+    .lock-divider-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin: -6px 0;
+    }
+
+    .lock-divider-line {
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      background: #cbd5e1;
+      z-index: 1;
+    }
+
+    .btn-aspect-lock {
+      position: relative;
+      z-index: 2;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #4f46e5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      transition: all 0.2s ease;
+    }
+
+    .btn-aspect-lock.unlocked {
+      color: #94a3b8;
+      border-color: #e2e8f0;
+    }
+
+    .sub-panel-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-action-back {
+      flex: 1;
+      padding: 14px;
+      border-radius: 100px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action-back:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .btn-action-go {
+      flex: 1.8;
+      padding: 14px;
+      border-radius: 100px;
+      border: none;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(79, 70, 229, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-action-go:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(79, 70, 229, 0.4);
+    }
+
+    #edited-result-panel {
+      display: none;
+      border: 2px solid #a5b4fc;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header>
+    <div class="header-logo">
+      <a href="https://nanalab.kr" target="_blank" rel="noopener noreferrer">
+        <img src="logo.png" alt="NANALAB" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='inline';">
+        <span id="fallback-logo" class="logo-fallback">NANALAB</span>
+      </a>
+    </div>
+    <div class="site-title">Smart GIF Studio</div>
+  </header>
+
+  <!-- 메인 영역 -->
+  <main>
+
+    <div class="hero-section" id="hero-section">
+      <h1 class="hero-title">Free GIF Editor</h1>
+      <p class="hero-sub">
+        Edit your GIF files for free! A variety of features including resizing, downscaling, cropping, and FPS adjustment are available for free!
+      </p>
+
+      <div>
+        <div class="security-notice-badge">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>All data is processed strictly within your computer browser. Since no data is transmitted to external servers, you can use it with complete confidence without worrying about data leaks.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 업로드 카드 -->
+    <div class="dropzone-card" id="dropzone-card">
+      <div class="dropzone-icon">
+        <i class="fa-solid fa-file-video"></i>
+      </div>
+      <div class="dropzone-title">Drag & Drop your GIF file here</div>
+      <div class="dropzone-sub">Supports animated GIF image files</div>
+      <button type="button" class="btn-choose" onclick="document.getElementById('gif-file-input').click();">
+        <i class="fa-solid fa-folder-open"></i> Choose File
+      </button>
+      <input type="file" id="gif-file-input" accept="image/gif">
+    </div>
+
+    <!-- GIF 편집 대시보드 레이아웃 -->
+    <div class="editor-layout" id="editor-layout">
+      
+      <!-- 좌측 패널 사이드 바 -->
+      <div class="preview-side-container">
+        
+        <!-- Original GIF 패널 -->
+        <div class="panel-card" id="original-gif-panel">
+          <div class="panel-header">
+            <div class="panel-title-group">
+              <button class="btn-toggle-panel" onclick="togglePanel('original-gif-panel')">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <div class="panel-title">
+                <i class="fa-solid fa-image" style="color: #6366f1;"></i> Original GIF
+              </div>
+            </div>
+            
+            <div class="header-actions">
+              <button class="btn-download" onclick="downloadOriginalGif()">
+                <i class="fa-solid fa-download"></i> Download
+              </button>
+
+              <button type="button" class="btn-change-file" onclick="resetUploader()">
+                <i class="fa-solid fa-folder-open"></i> Choose Another File
+              </button>
+            </div>
+          </div>
+
+          <div class="panel-body">
+            <div class="gif-display-box">
+              <img id="gif-preview-img" src="" alt="Original GIF Preview">
+            </div>
+
+            <div class="info-grid">
+              <div class="info-card-item">
+                <span class="info-card-label"><i class="fa-solid fa-hard-drive" style="color: #6366f1;"></i> File Size</span>
+                <span class="info-card-value" id="info-filesize">0 MB</span>
+              </div>
+
+              <div class="info-card-item">
+                <span class="info-card-label"><i class="fa-solid fa-expand" style="color: #10b981;"></i> Resolution</span>
+                <span class="info-card-value" id="info-resolution">0 x 0</span>
+              </div>
+
+              <div class="info-card-item">
+                <span class="info-card-label"><i class="fa-solid fa-film" style="color: #ec4899;"></i> Frame Rate</span>
+                <span class="info-card-value" id="info-fps">0 FPS</span>
+              </div>
+
+              <div class="info-card-item">
+                <span class="info-card-label"><i class="fa-solid fa-layer-group" style="color: #f59e0b;"></i> Total Frames</span>
+                <span class="info-card-value" id="info-frames">0 frames</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edited Result GIF 패널 -->
+        <div class="panel-card" id="edited-result-panel">
+          <div class="panel-header">
+            <div class="panel-title-group">
+              <button class="btn-toggle-panel" onclick="togglePanel('edited-result-panel')">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <div class="panel-title" id="edited-panel-title">
+                <i class="fa-solid fa-wand-magic-sparkles" style="color: #10b981;"></i> Edited GIF
+              </div>
+            </div>
+            
+            <div class="header-actions">
+              <button class="btn-download" onclick="downloadEditedResult()">
+                <i class="fa-solid fa-download"></i> Download
+              </button>
+            </div>
+          </div>
+
+          <div class="panel-body">
+            <div class="gif-display-box">
+              <img id="edited-preview-img" src="" alt="Edited GIF Preview">
+            </div>
+
+            <div class="info-grid">
+              <div class="info-card-item">
+                <span class="info-card-label"><i class="fa-solid fa-hard-drive" style="color: #6366f1;"></i> New Size</span>
+                <span class="info-card-value" id="edited-filesize">0 MB</span>
+              </div>
+
+              <div class="info-card-item">
+                <span class="info-card-label"><i class="fa-solid fa-expand" style="color: #10b981;"></i> New Resolution</span>
+                <span class="info-card-value" id="edited-resolution">0 x 0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 우측 편집 제어 패널 -->
+      <div class="gif-controls-panel">
+        <div class="panel-card">
+          
+          <div class="panel-header">
+            <div class="panel-title" id="controls-panel-title">
+              <i class="fa-solid fa-sliders" style="color: #6366f1;"></i> Editor Tools
+            </div>
+          </div>
+
+          <!-- 메인 9가지 툴 버튼 그리드 -->
+          <div class="tools-grid" id="main-tools-grid">
+            <button class="tool-btn" onclick="openSubTool('resize')">
+              <div class="tool-icon" style="color: #2563eb;"><i class="fa-solid fa-expand-arrows-alt"></i></div>
+              <span class="tool-label">Resize</span>
+            </button>
+
+            <button class="tool-btn" onclick="openSubTool('crop')">
+              <div class="tool-icon" style="color: #7c3aed;"><i class="fa-solid fa-crop-simple"></i></div>
+              <span class="tool-label">Crop</span>
+            </button>
+
+            <button class="tool-btn" onclick="openSubTool('downsize')">
+              <div class="tool-icon" style="color: #059669;"><i class="fa-solid fa-compress"></i></div>
+              <span class="tool-label">Downsizing</span>
+            </button>
+
+            <button class="tool-btn" onclick="openSubTool('convert')">
+              <div class="tool-icon" style="color: #d97706;"><i class="fa-solid fa-repeat"></i></div>
+              <span class="tool-label">Convert</span>
+            </button>
+
+            <button class="tool-btn" onclick="openSubTool('rotate')">
+              <div class="tool-icon" style="color: #ec4899;"><i class="fa-solid fa-rotate-right"></i></div>
+              <span class="tool-label">Rotate</span>
+            </button>
+
+            <button class="tool-btn" onclick="openSubTool('optimize')">
+              <div class="tool-icon" style="color: #0284c7;"><i class="fa-solid fa-gauge-high"></i></div>
+              <span class="tool-label">Optimize</span>
+            </button>
+
+            <button class="tool-btn" onclick="openSubTool('reverse')">
+              <div class="tool-icon" style="color: #8b5cf6;"><i class="fa-solid fa-backward"></i></div>
+              <span class="tool-label">Reverse</span>
+            </button>
+
+            <button class="tool-btn" onclick="openSubTool('speed')">
+              <div class="tool-icon" style="color: #ea580c;"><i class="fa-solid fa-gauge-simple-high"></i></div>
+              <span class="tool-label">Speed</span>
+            </button>
+
+            <button class="tool-btn" onclick="openSubTool('cut')">
+              <div class="tool-icon" style="color: #ef4444;"><i class="fa-solid fa-scissors"></i></div>
+              <span class="tool-label">Cut</span>
+            </button>
+          </div>
+
+          <!-- 1. Resize Sub-Panel -->
+          <div class="sub-tool-panel" id="resize-tool-panel">
+            <div class="tool-controls-box">
+              <div class="axis-control-row">
+                <span class="axis-label">Width</span>
+                <div class="slider-box">
+                  <input type="range" id="resize-x-slider">
+                  <span class="axis-val-badge" id="resize-x-val">0 px</span>
+                </div>
+              </div>
+
+              <div class="lock-divider-row">
+                <div class="lock-divider-line"></div>
+                <button type="button" class="btn-aspect-lock" id="btn-aspect-lock" onclick="toggleAspectLock()">
+                  <i class="fa-solid fa-lock" id="aspect-lock-icon"></i>
+                </button>
+              </div>
+
+              <div class="axis-control-row">
+                <span class="axis-label">Height</span>
+                <div class="slider-box">
+                  <input type="range" id="resize-y-slider">
+                  <span class="axis-val-badge" id="resize-y-val">0 px</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sub-panel-actions">
+              <button class="btn-action-back" onclick="closeSubTool()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+              <button class="btn-action-go" id="btn-resize-go" onclick="executeProcess('Resize')"><i class="fa-solid fa-play"></i> Go!</button>
+            </div>
+          </div>
+
+          <!-- 2. Crop Sub-Panel -->
+          <div class="sub-tool-panel" id="crop-tool-panel">
+            <div class="tool-controls-box">
+              <div class="control-row">
+                <span class="control-row-label">Aspect Ratio</span>
+                <div class="pill-options">
+                  <button class="pill-btn active">1:1 Square</button>
+                  <button class="pill-btn">16:9 Wide</button>
+                  <button class="pill-btn">4:3 Standard</button>
+                </div>
+              </div>
+              <div class="control-row">
+                <span class="control-row-label">Fill Blank Method</span>
+                <div class="pill-options">
+                  <button class="pill-btn active">Solid Color</button>
+                  <button class="pill-btn">Zoom & Crop</button>
+                </div>
+              </div>
+            </div>
+            <div class="sub-panel-actions">
+              <button class="btn-action-back" onclick="closeSubTool()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+              <button class="btn-action-go" onclick="executeProcess('Crop')"><i class="fa-solid fa-play"></i> Go!</button>
+            </div>
+          </div>
+
+          <!-- 3. Downsizing Sub-Panel -->
+          <div class="sub-tool-panel" id="downsize-tool-panel">
+            <div class="tool-controls-box">
+              <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" checked> Scale Down (50% Resolution)</label>
+                <label class="checkbox-item"><input type="checkbox" checked> Drop Alternate Frames (50% Frame Skips)</label>
+                <label class="checkbox-item"><input type="checkbox"> Reduce Quality (Color Palette Compression)</label>
+              </div>
+            </div>
+            <div class="sub-panel-actions">
+              <button class="btn-action-back" onclick="closeSubTool()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+              <button class="btn-action-go" onclick="executeProcess('Downsizing')"><i class="fa-solid fa-play"></i> Go!</button>
+            </div>
+          </div>
+
+          <!-- 4. Format Convert Sub-Panel -->
+          <div class="sub-tool-panel" id="convert-tool-panel">
+            <div class="tool-controls-box">
+              <div class="control-row">
+                <span class="control-row-label">Target Format</span>
+                <div class="pill-options">
+                  <button class="pill-btn active">MP4 Video</button>
+                  <button class="pill-btn">WebM Video</button>
+                  <button class="pill-btn">PNG Image</button>
+                  <button class="pill-btn">JPG Image</button>
+                </div>
+              </div>
+            </div>
+            <div class="sub-panel-actions">
+              <button class="btn-action-back" onclick="closeSubTool()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+              <button class="btn-action-go" onclick="executeProcess('Convert')"><i class="fa-solid fa-play"></i> Go!</button>
+            </div>
+          </div>
+
+          <!-- 5. Rotate Sub-Panel -->
+          <div class="sub-tool-panel" id="rotate-tool-panel">
+            <div class="tool-controls-box">
+              <div class="control-row">
+                <span class="control-row-label">Rotation Angle</span>
+                <div class="pill-options">
+                  <button class="pill-btn active">90° CW</button>
+                  <button class="pill-btn">180°</button>
+                  <button class="pill-btn">270° CW</button>
+                </div>
+              </div>
+              <div class="control-row">
+                <span class="control-row-label">Flip Options</span>
+                <div class="pill-options">
+                  <button class="pill-btn">Flip Horizontal</button>
+                  <button class="pill-btn">Flip Vertical</button>
+                </div>
+              </div>
+            </div>
+            <div class="sub-panel-actions">
+              <button class="btn-action-back" onclick="closeSubTool()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+              <button class="btn-action-go" onclick="executeProcess('Rotate')"><i class="fa-solid fa-play"></i> Go!</button>
+            </div>
+          </div>
+
+          <!-- 6. Optimize Sub-Panel -->
+          <div class="sub-tool-panel" id="optimize-tool-panel">
+            <div class="tool-controls-box">
+              <div class="control-row">
+                <span class="control-row-label">Optimization Level</span>
+                <div class="pill-options">
+                  <button class="pill-btn">Light</button>
+                  <button class="pill-btn active">Balanced</button>
+                  <button class="pill-btn">Aggressive</button>
+                </div>
+              </div>
+            </div>
+            <div class="sub-panel-actions">
+              <button class="btn-action-back" onclick="closeSubTool()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+              <button class="btn-action-go" onclick="executeProcess('Optimize')"><i class="fa-solid fa-play"></i> Go!</button>
+            </div>
+          </div>
+
+          <!-- 7. Reverse Sub-Panel -->
+          <div class="sub-tool-panel" id="reverse-tool-panel">
+            <div class="tool-controls-box">
+              <div style="font-size:0.9rem; font-weight:700; color:#334155; text-align:center;">
+                Reverse all frames in backwards loop order.
+              </div>
+            </div>
+            <div class="sub-panel-actions">
+              <button class="btn-action-back" onclick="closeSubTool()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+              <button class="btn-action-go" onclick="executeProcess('Reverse')"><i class="fa-solid fa-play"></i> Go!</button>
+            </div>
+          </div>
+
+          <!-- 8. Speed Sub-Panel -->
+          <div class="sub-tool-panel" id="speed-tool-panel">
+            <div class="tool-controls-box">
+              <div class="control-row">
+                <span class="control-row-label">Playback Speed Ratio</span>
+                <div class="pill-options">
+                  <button class="pill-btn">0.5x</button>
+                  <button class="pill-btn active">1.0x</button>
+                  <button class="pill-btn">1.5x</button>
+                  <button class="pill-btn">2.0x</button>
+                </div>
+              </div>
+            </div>
+            <div class="sub-panel-actions">
+              <button class="btn-action-back" onclick="closeSubTool()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+              <button class="btn-action-go" onclick="executeProcess('Speed')"><i class="fa-solid fa-play"></i> Go!</button>
+            </div>
+          </div>
+
+          <!-- 9. Cut Sub-Panel -->
+          <div class="sub-tool-panel" id="cut-tool-panel">
+            <div class="tool-controls-box">
+              <div class="control-row">
+                <span class="control-row-label">Trim Frame Range</span>
+                <div style="display:flex; gap:10px; align-items:center;">
+                  <span style="font-size:0.85rem; font-weight:700;">Start:</span>
+                  <input type="number" id="cut-start-frame" value="1" min="1" style="width:70px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-weight:700;">
+                  <span style="font-size:0.85rem; font-weight:700;">End:</span>
+                  <input type="number" id="cut-end-frame" value="10" min="1" style="width:70px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-weight:700;">
+                </div>
+              </div>
+            </div>
+            <div class="sub-panel-actions">
+              <button class="btn-action-back" onclick="closeSubTool()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+              <button class="btn-action-go" onclick="executeProcess('Cut')"><i class="fa-solid fa-play"></i> Go!</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // 마우스 추적 인터랙션
+    document.addEventListener('mousemove', (e) => {
+      const xPercent = (e.clientX / window.innerWidth) * 100;
+      const yPercent = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty('--mouse-x', `${xPercent}%`);
+      document.documentElement.style.setProperty('--mouse-y', `${yPercent}%`);
+    });
+
+    const dropzoneCard = document.getElementById('dropzone-card');
+    const heroSection = document.getElementById('hero-section');
+    const gifFileInput = document.getElementById('gif-file-input');
+    const editorLayout = document.getElementById('editor-layout');
+
+    const gifPreviewImg = document.getElementById('gif-preview-img');
+    const infoFilesize = document.getElementById('info-filesize');
+    const infoResolution = document.getElementById('info-resolution');
+    const infoFps = document.getElementById('info-fps');
+    const infoFrames = document.getElementById('info-frames');
+
+    const resizeXSlider = document.getElementById('resize-x-slider');
+    const resizeYSlider = document.getElementById('resize-y-slider');
+    const resizeXVal = document.getElementById('resize-x-val');
+    const resizeYVal = document.getElementById('resize-y-val');
+    const aspectLockIcon = document.getElementById('aspect-lock-icon');
+    const btnAspectLock = document.getElementById('btn-aspect-lock');
+
+    const editedResultPanel = document.getElementById('edited-result-panel');
+    const editedPreviewImg = document.getElementById('edited-preview-img');
+    const editedFilesize = document.getElementById('edited-filesize');
+    const editedResolution = document.getElementById('edited-resolution');
+    const editedPanelTitle = document.getElementById('edited-panel-title');
+
+    let currentFile = null;
+    let currentObjectUrl = null;
+    let editedObjectUrl = null;
+    let currentActionName = "Edited";
+
+    let originalWidth = 0;
+    let originalHeight = 0;
+    let isAspectLocked = true;
+
+    // 드래그 앤 드롭
+    ['dragenter', 'dragover'].forEach(name => {
+      dropzoneCard.addEventListener(name, (e) => { e.preventDefault(); dropzoneCard.classList.add('dragover'); });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      dropzoneCard.addEventListener(name, (e) => { e.preventDefault(); dropzoneCard.classList.remove('dragover'); });
+    });
+
+    dropzoneCard.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files.length > 0) handleGifFile(e.dataTransfer.files[0]);
+    });
+
+    gifFileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleGifFile(e.target.files[0]);
+        gifFileInput.value = '';
+      }
+    });
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // GIF 파서
+    async function parseGifMetadata(file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+
+      let totalDelayCentiseconds = 0;
+      let frameCount = 0;
+
+      for (let i = 0; i < bytes.length - 8; i++) {
+        if (bytes[i] === 0x21 && bytes[i + 1] === 0xF9 && bytes[i + 2] === 0x04) {
+          frameCount++;
+          const delay = bytes[i + 4] | (bytes[i + 5] << 8);
+          totalDelayCentiseconds += (delay === 0 ? 10 : delay);
+        }
+      }
+
+      if (frameCount === 0) frameCount = 1;
+      const totalDurationSec = totalDelayCentiseconds / 100;
+      const avgFps = totalDurationSec > 0 ? (frameCount / totalDurationSec).toFixed(1) : "15.0";
+
+      return { frameCount, fps: avgFps, duration: totalDurationSec.toFixed(1) };
+    }
+
+    async function handleGifFile(file) {
+      if (!file.type.includes('gif') && !file.name.toLowerCase().endsWith('.gif')) {
+        alert('Please upload a valid GIF image file.');
+        return;
+      }
+
+      currentFile = file;
+      if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+      currentObjectUrl = URL.createObjectURL(file);
+
+      gifPreviewImg.src = currentObjectUrl;
+      infoFilesize.innerText = formatBytes(file.size);
+
+      const img = new Image();
+      img.onload = async function() {
+        originalWidth = this.width;
+        originalHeight = this.height;
+
+        infoResolution.innerText = `${originalWidth} x ${originalHeight}`;
+        const meta = await parseGifMetadata(file);
+        infoFps.innerText = `${meta.fps} FPS`;
+        infoFrames.innerText = `${meta.frameCount} frames (${meta.duration}s)`;
+
+        initResizeSliders();
+      };
+      img.src = currentObjectUrl;
+
+      heroSection.style.display = 'none';
+      dropzoneCard.style.display = 'none';
+      editorLayout.style.display = 'flex';
+    }
+
+    function initResizeSliders() {
+      const minX = Math.max(10, Math.round(originalWidth * 0.05));
+      const maxX = Math.round(originalWidth * 3.0);
+      const minY = Math.max(10, Math.round(originalHeight * 0.05));
+      const maxY = Math.round(originalHeight * 3.0);
+
+      resizeXSlider.min = minX; resizeXSlider.max = maxX; resizeXSlider.value = originalWidth;
+      resizeYSlider.min = minY; resizeYSlider.max = maxY; resizeYSlider.value = originalHeight;
+
+      resizeXVal.innerText = `${originalWidth} px`;
+      resizeYVal.innerText = `${originalHeight} px`;
+    }
+
+    function toggleAspectLock() {
+      isAspectLocked = !isAspectLocked;
+      if (isAspectLocked) {
+        aspectLockIcon.className = "fa-solid fa-lock";
+        btnAspectLock.classList.remove('unlocked');
+      } else {
+        aspectLockIcon.className = "fa-solid fa-lock-open";
+        btnAspectLock.classList.add('unlocked');
+      }
+    }
+
+    resizeXSlider.addEventListener('input', (e) => {
+      const newX = parseInt(e.target.value);
+      resizeXVal.innerText = `${newX} px`;
+      if (isAspectLocked && originalWidth > 0) {
+        const ratio = originalHeight / originalWidth;
+        const newY = Math.round(newX * ratio);
+        resizeYSlider.value = newY;
+        resizeYVal.innerText = `${newY} px`;
+      }
+    });
+
+    resizeYSlider.addEventListener('input', (e) => {
+      const newY = parseInt(e.target.value);
+      resizeYVal.innerText = `${newY} px`;
+      if (isAspectLocked && originalHeight > 0) {
+        const ratio = originalWidth / originalHeight;
+        const newX = Math.round(newY * ratio);
+        resizeXSlider.value = newX;
+        resizeXVal.innerText = `${newX} px`;
+      }
+    });
+
+    // Sub-Tool 패널 열기/닫기
+    function openSubTool(toolName) {
+      document.getElementById('main-tools-grid').style.display = 'none';
+      document.querySelectorAll('.sub-tool-panel').forEach(p => p.style.display = 'none');
+
+      const targetPanel = document.getElementById(`${toolName}-tool-panel`);
+      if (targetPanel) {
+        targetPanel.style.display = 'flex';
+        document.getElementById('controls-panel-title').innerHTML = `<i class="fa-solid fa-gears" style="color: #6366f1;"></i> ${toolName.toUpperCase()} GIF`;
+      }
+    }
+
+    function closeSubTool() {
+      document.getElementById('main-tools-grid').style.display = 'grid';
+      document.querySelectorAll('.sub-tool-panel').forEach(p => p.style.display = 'none');
+      document.getElementById('controls-panel-title').innerHTML = `<i class="fa-solid fa-sliders" style="color: #6366f1;"></i> Editor Tools`;
+    }
+
+    function togglePanel(panelId) {
+      document.getElementById(panelId).classList.toggle('collapsed');
+    }
+
+    // 기능 실행 공통 함수
+    function executeProcess(actionName) {
+      currentActionName = actionName;
+
+      gifshot.createGIF({
+        gifWidth: parseInt(resizeXSlider.value) || originalWidth,
+        gifHeight: parseInt(resizeYSlider.value) || originalHeight,
+        images: [currentObjectUrl],
+        interval: 0.1,
+        numFrames: 10
+      }, function (obj) {
+        if (!obj.error) {
+          editedObjectUrl = obj.image;
+          editedPreviewImg.src = editedObjectUrl;
+
+          const base64Str = editedObjectUrl.split(',')[1];
+          const decodedLen = atob(base64Str).length;
+
+          editedFilesize.innerText = formatBytes(decodedLen);
+          editedResolution.innerText = `${parseInt(resizeXSlider.value)} x ${parseInt(resizeYSlider.value)}`;
+          editedPanelTitle.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color: #10b981;"></i> ${actionName} Result`;
+
+          document.getElementById('original-gif-panel').classList.add('collapsed');
+          editedResultPanel.style.display = 'flex';
+        } else {
+          alert('처리 과정에서 오류가 발생했습니다.');
+        }
+      });
+    }
+
+    function downloadOriginalGif() {
+      if (!currentObjectUrl || !currentFile) return;
+      const a = document.createElement('a');
+      a.href = currentObjectUrl;
+      a.download = currentFile.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function downloadEditedResult() {
+      if (!editedObjectUrl || !currentFile) return;
+      const a = document.createElement('a');
+      a.href = editedObjectUrl;
+      a.download = `${currentActionName}_${currentFile.name}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function resetUploader() {
+      if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+      currentFile = null;
+      currentObjectUrl = null;
+      editedObjectUrl = null;
+
+      document.getElementById('original-gif-panel').classList.remove('collapsed');
+      editedResultPanel.style.display = 'none';
+
+      closeSubTool();
+
+      heroSection.style.display = 'flex';
+      dropzoneCard.style.display = 'block';
+      editorLayout.style.display = 'none';
+    }
+
+    // Pill 버튼 클릭 인터랙션
+    document.querySelectorAll('.pill-options').forEach(group => {
+      group.querySelectorAll('.pill-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          group.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+```

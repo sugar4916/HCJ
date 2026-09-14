@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Image Resizer</title>
+
+  <!-- Pretendard 폰트 & FontAwesome 아이콘 라이브러리 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- JSZip 라이브러리 (일괄 다운로드 ZIP 압축용) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1e293b;
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(199, 210, 254, 0.75) 0%, rgba(243, 232, 255, 0.45) 30%, rgba(254, 242, 242, 0.1) 60%),
+        linear-gradient(135deg, #f0f7ff 0%, #f5f3ff 50%, #fef2f2 100%);
+      background-attachment: fixed;
+    }
+
+    /* 1 & 2. 상단 헤더 */
+    header {
+      width: 100%;
+      height: 72px;
+      padding: 0 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      z-index: 100;
+    }
+
+    /* 1. logo.png (클릭 시 https://nanalab.kr 이동) */
+    .header-logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      height: 38px;
+      object-fit: contain;
+    }
+
+    .logo-fallback {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #4f46e5;
+      display: none;
+    }
+
+    /* 2. 우상단 타이틀 */
+    .site-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    main {
+      flex: 1;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* 옵션 패널 (비율 선택, 편집 모드, 여백 색상) */
+    .options-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 24px 28px;
+      box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .option-group-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .option-group-title i {
+      color: #6366f1;
+    }
+
+    /* 4. 비율 선택 버튼들 */
+    .ratio-pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .ratio-pill {
+      padding: 9px 18px;
+      border-radius: 100px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .ratio-pill.active {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+    }
+
+    /* 커스텀 비율 입력창 */
+    .custom-ratio-inputs {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .custom-ratio-inputs.active {
+      display: flex;
+    }
+
+    .custom-ratio-inputs input {
+      width: 70px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      outline: none;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* 5, 6, 7. Padding / Crop 옵션 선택 */
+    .mode-switch-container {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .mode-pills {
+      display: flex;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 100px;
+    }
+
+    .mode-btn {
+      padding: 8px 22px;
+      border-radius: 100px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mode-btn.active {
+      background: #ffffff;
+      color: #1e293b;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* 6. 여백 색상 피커 */
+    .color-picker-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: opacity 0.3s ease;
+    }
+
+    .color-picker-group.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .color-picker-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      padding: 4px 12px 4px 6px;
+      border-radius: 100px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .color-picker-wrapper input[type="color"] {
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      background: none;
+    }
+
+    .color-picker-wrapper span {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    /* 3. 업로드 드래그 앤 드롭 구역 */
+    .dropzone {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 2px dashed #a5b4fc;
+      border-radius: 28px;
+      padding: 40px 24px;
+      text-align: center;
+      box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: #6366f1;
+      background: rgba(255, 255, 255, 0.95);
+      transform: translateY(-2px);
+      box-shadow: 0 25px 50px -10px rgba(99, 102, 241, 0.18),
+                  0 0 0 2px #6366f1;
+    }
+
+    .dropzone-icon {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 14px;
+      background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6366f1;
+      font-size: 1.5rem;
+    }
+
+    .dropzone-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+
+    .dropzone-sub {
+      font-size: 0.88rem;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    .btn-select {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      padding: 12px 28px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(79, 70, 229, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-select:hover {
+      background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+      transform: translateY(-1px);
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    /* 8. 이미지 리스트 및 11. 일괄 다운로드 헤더 */
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .list-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    /* 11. 일괄 다운로드 버튼 */
+    .btn-bulk-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 100px;
+      border: none;
+      background: #e2e8f0;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: not-allowed;
+      transition: all 0.3s ease;
+    }
+
+    .btn-bulk-download.active {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+    }
+
+    .btn-bulk-download.active:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(16, 185, 129, 0.45);
+    }
+
+    /* 8, 9, 10. 이미지 목록 카드 */
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .file-item {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 16px 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04),
+                  0 0 0 1px rgba(255, 255, 255, 1);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 8. 썸네일 이미지 */
+    .thumb-img {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+
+    .file-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    .file-name {
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 9. 프로그레스 바 */
+    .progress-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .progress-bar-bg {
+      flex: 1;
+      height: 7px;
+      background: #e2e8f0;
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+      border-radius: 100px;
+      transition: width 0.15s ease;
+    }
+
+    .progress-text {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #6366f1;
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* 10. 개별 다운로드 버튼 */
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 100px;
+      border: none;
+      background: #e2e8f0;
+      color: #94a3b8;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: not-allowed;
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    .btn-download.active {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-download.active:hover {
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header>
+    <!-- 1. 좌상단 logo.png (클릭 시 nanalab.kr 이동) -->
+    <div class="header-logo">
+      <a href="https://nanalab.kr" target="_blank" rel="noopener noreferrer" title="nanalab.kr로 이동">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='inline';">
+        <span id="fallback-logo" class="logo-fallback">NANALAB</span>
+      </a>
+    </div>
+    <!-- 2. 우상단 Smart Image Resizer -->
+    <div class="site-title">Smart Image Resizer</div>
+  </header>
+
+  <!-- 메인 영역 -->
+  <main>
+    
+    <!-- 옵션 선택 패널 -->
+    <div class="options-card">
+      <!-- 4. 비율 선택 -->
+      <div>
+        <div class="option-group-title">
+          <i class="fa-solid fa-vector-square"></i> 캔버스 비율 선택
+        </div>
+        <div class="ratio-pills">
+          <button class="ratio-pill active" data-ratio="1:1">1:1</button>
+          <button class="ratio-pill" data-ratio="3:4">3:4</button>
+          <button class="ratio-pill" data-ratio="4:3">4:3</button>
+          <button class="ratio-pill" data-ratio="9:16">9:16</button>
+          <button class="ratio-pill" data-ratio="16:9">16:9</button>
+          <button class="ratio-pill" data-ratio="custom">커스텀</button>
+        </div>
+        <!-- 커스텀 비율 입력 -->
+        <div class="custom-ratio-inputs" id="custom-ratio-box">
+          <input type="number" id="custom-w" value="1" min="1" placeholder="너비">
+          <span>:</span>
+          <input type="number" id="custom-h" value="1" min="1" placeholder="높이">
+        </div>
+      </div>
+
+      <!-- 5, 6, 7. Padding / Crop 및 여백 색상 -->
+      <div>
+        <div class="option-group-title">
+          <i class="fa-solid fa-crop-simple"></i> 편집 방식
+        </div>
+        <div class="mode-switch-container">
+          <div class="mode-pills">
+            <button class="mode-btn active" id="btn-mode-padding">Padding (여백 생성)</button>
+            <button class="mode-btn" id="btn-mode-crop">Crop (잘라내기)</button>
+          </div>
+          
+          <!-- 6. 여백 색상 선택 -->
+          <div class="color-picker-group" id="color-picker-group">
+            <div class="color-picker-wrapper">
+              <input type="color" id="bg-color-picker" value="#ffffff">
+              <span id="color-hex-text">#FFFFFF</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 파일 업로드 및 드래그 앤 드롭 구역 -->
+    <div class="dropzone" id="dropzone">
+      <div class="dropzone-icon">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+      </div>
+      <div class="dropzone-title">Upload or Drop your images!</div>
+      <div class="dropzone-sub">JPG, PNG, WEBP, GIF 이미지 파일들을 올려주세요</div>
+      <button type="button" class="btn-select" onclick="document.getElementById('file-input').click();">
+        <i class="fa-solid fa-image"></i> 사진 선택하기
+      </button>
+      <input type="file" id="file-input" multiple accept="image/*">
+    </div>
+
+    <!-- 8. 이미지 목록 및 11. 일괄 다운로드 버튼 -->
+    <div class="list-header" id="list-header" style="display: none;">
+      <div class="list-title">변환 목록 (<span id="file-count">0</span>)</div>
+      <!-- 11. 일괄 다운로드 (ZIP) -->
+      <button class="btn-bulk-download" id="btn-bulk-download" disabled>
+        <i class="fa-solid fa-file-zipper"></i> 일괄 다운로드 (ZIP)
+      </button>
+    </div>
+
+    <!-- 8 & 9. 썸네일 & 프로그레스 바 리스트 -->
+    <div class="file-list" id="file-list"></div>
+
+  </main>
+
+  <script>
+    // 현재 설정 상태
+    let selectedRatio = "1:1";
+    let editMode = "padding"; // 'padding' or 'crop'
+    let paddingColor = "#ffffff";
+    
+    // 변환된 이미지 데이터 보관용
+    const processedMap = new Map(); // fileId -> { name, blob }
+
+    // 마우스 추적 배경 인터랙션
+    document.addEventListener('mousemove', (e) => {
+      const xPercent = (e.clientX / window.innerWidth) * 100;
+      const yPercent = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty('--mouse-x', `${xPercent}%`);
+      document.documentElement.style.setProperty('--mouse-y', `${yPercent}%`);
+    });
+
+    // 4. 비율 버튼 이벤트
+    const ratioPills = document.querySelectorAll('.ratio-pill');
+    const customRatioBox = document.getElementById('custom-ratio-box');
+
+    ratioPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        ratioPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        selectedRatio = pill.dataset.ratio;
+
+        if (selectedRatio === 'custom') {
+          customRatioBox.classList.add('active');
+        } else {
+          customRatioBox.classList.remove('active');
+        }
+      });
+    });
+
+    // 5, 6, 7. Padding / Crop 모드 선택 이벤트
+    const btnPadding = document.getElementById('btn-mode-padding');
+    const btnCrop = document.getElementById('btn-mode-crop');
+    const colorPickerGroup = document.getElementById('color-picker-group');
+    const bgColorPicker = document.getElementById('bg-color-picker');
+    const colorHexText = document.getElementById('color-hex-text');
+
+    btnPadding.addEventListener('click', () => {
+      editMode = 'padding';
+      btnPadding.classList.add('active');
+      btnCrop.classList.remove('active');
+      colorPickerGroup.classList.remove('disabled');
+    });
+
+    btnCrop.addEventListener('click', () => {
+      editMode = 'crop';
+      btnCrop.classList.add('active');
+      btnPadding.classList.remove('active');
+      colorPickerGroup.classList.add('disabled');
+    });
+
+    bgColorPicker.addEventListener('input', (e) => {
+      paddingColor = e.target.value;
+      colorHexText.innerText = paddingColor.toUpperCase();
+    });
+
+    // 드래그 앤 드롭 업로드 처리
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const fileListContainer = document.getElementById('file-list');
+    const listHeader = document.getElementById('list-header');
+    const fileCountSpan = document.getElementById('file-count');
+    const btnBulkDownload = document.getElementById('btn-bulk-download');
+
+    ['dragenter', 'dragover'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+      });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFiles(e.target.files);
+        fileInput.value = '';
+      }
+    });
+
+    // 비율 파싱
+    function getTargetRatioValue() {
+      if (selectedRatio === 'custom') {
+        const w = parseFloat(document.getElementById('custom-w').value) || 1;
+        const h = parseFloat(document.getElementById('custom-h').value) || 1;
+        return w / h;
+      }
+      const [w, h] = selectedRatio.split(':').map(Number);
+      return w / h;
+    }
+
+    // 파일 업로드 처리
+    function handleFiles(files) {
+      const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+      if (imageFiles.length === 0) {
+        alert('이미지 파일만 선택해 주세요.');
+        return;
+      }
+
+      listHeader.style.display = 'flex';
+
+      imageFiles.forEach(file => {
+        processImage(file);
+      });
+    }
+
+    // 이미지 리사이징 및 처리
+    function processImage(file) {
+      const fileId = 'file_' + Math.random().toString(36).substr(2, 9);
+      const thumbUrl = URL.createObjectURL(file);
+
+      // 8, 9, 10. UI 아이템 생성
+      const itemHTML = `
+        <div class="file-item" id="${fileId}">
+          <img src="${thumbUrl}" class="thumb-img" alt="thumbnail">
+          <div class="file-details">
+            <span class="file-name">${file.name}</span>
+            <div class="progress-wrapper">
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="bar_${fileId}"></div>
+              </div>
+              <span class="progress-text" id="text_${fileId}">0%</span>
+            </div>
+          </div>
+          <button class="btn-download" id="btn_${fileId}" disabled>
+            <i class="fa-solid fa-download"></i> 저장
+          </button>
+        </div>
+      `;
+
+      fileListContainer.insertAdjacentHTML('afterbegin', itemHTML);
+      fileCountSpan.innerText = fileListContainer.children.length;
+
+      const bar = document.getElementById(`bar_${fileId}`);
+      const text = document.getElementById(`text_${fileId}`);
+      const btn = document.getElementById(`btn_${fileId}`);
+
+      // 9. 프로그레스 바 연출
+      let progress = 0;
+      const progressTimer = setInterval(() => {
+        progress += 15;
+        if (progress < 90) {
+          bar.style.width = `${progress}%`;
+          text.innerText = `${progress}%`;
+        }
+      }, 50);
+
+      const img = new Image();
+      img.onload = () => {
+        const targetRatio = getTargetRatioValue();
+
+        // 캔버스 크기 계산 (고화질 기준 max dimension 1200px)
+        let canvasW, canvasH;
+        const maxDim = 1200;
+        if (targetRatio >= 1) {
+          canvasW = maxDim;
+          canvasH = Math.round(maxDim / targetRatio);
+        } else {
+          canvasH = maxDim;
+          canvasW = Math.round(maxDim * targetRatio);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = canvasW;
+        canvas.height = canvasH;
+        const ctx = canvas.getContext('2d');
+
+        if (editMode === 'padding') {
+          // 6. Padding 방식 (여백 색상 채우기 + 비율 유지)
+          ctx.fillStyle = paddingColor;
+          ctx.fillRect(0, 0, canvasW, canvasH);
+
+          const scale = Math.min(canvasW / img.width, canvasH / img.height);
+          const drawW = img.width * scale;
+          const drawH = img.height * scale;
+          const drawX = (canvasW - drawW) / 2;
+          const drawY = (canvasH - drawH) / 2;
+
+          ctx.drawImage(img, drawX, drawY, drawW, drawH);
+        } else {
+          // 7. Crop 방식 (중앙 기준 자르기)
+          const scale = Math.max(canvasW / img.width, canvasH / img.height);
+          const drawW = img.width * scale;
+          const drawH = img.height * scale;
+          const drawX = (canvasW - drawW) / 2;
+          const drawY = (canvasH - drawH) / 2;
+
+          ctx.drawImage(img, drawX, drawY, drawW, drawH);
+        }
+
+        // 10. 완료 처리 및 변환된 Blob 저장
+        canvas.toBlob((blob) => {
+          clearInterval(progressTimer);
+          bar.style.width = '100%';
+          text.innerText = '완료';
+          text.style.color = '#059669';
+
+          btn.classList.add('active');
+          btn.removeAttribute('disabled');
+
+          // 저장
+          processedMap.set(fileId, { name: `resized_${file.name}`, blob: blob });
+
+          // 개별 다운로드 버튼
+          btn.onclick = () => {
+            const a = document.createElement('a');
+            a.download = `resized_${file.name}`;
+            a.href = URL.createObjectURL(blob);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          };
+
+          // 11. 모든 파일이 완성되면 일괄 다운로드 활성화
+          checkAllCompleted();
+        }, 'image/png');
+      };
+
+      img.src = thumbUrl;
+    }
+
+    // 11. 모든 작업 완료 여부 확인 후 일괄 다운로드 활성화
+    function checkAllCompleted() {
+      const totalItems = fileListContainer.children.length;
+      if (processedMap.size === totalItems && totalItems > 0) {
+        btnBulkDownload.classList.add('active');
+        btnBulkDownload.removeAttribute('disabled');
+      }
+    }
+
+    // 11. 일괄 다운로드 (ZIP 파일) 버튼 클릭 이벤트
+    btnBulkDownload.addEventListener('click', () => {
+      if (processedMap.size === 0) return;
+
+      const zip = new JSZip();
+      processedMap.forEach((item) => {
+        zip.file(item.name, item.blob);
+      });
+
+      zip.generateAsync({ type: 'blob' }).then((content) => {
+        const a = document.createElement('a');
+        a.download = 'resized_images.zip';
+        a.href = URL.createObjectURL(content);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marble Drop Lottery Studio</title>
+
+  <!-- Pretendard 폰트 & FontAwesome 아이콘 라이브러리 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1e293b;
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(199, 210, 254, 0.75) 0%, rgba(243, 232, 255, 0.45) 30%, rgba(254, 242, 242, 0.1) 60%),
+        linear-gradient(135deg, #f0f7ff 0%, #f5f3ff 50%, #fef2f2 100%);
+      background-attachment: fixed;
+    }
+
+    /* 상단 헤더 */
+    header {
+      width: 100%;
+      height: 72px;
+      padding: 0 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      z-index: 100;
+    }
+
+    .header-logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      height: 38px;
+      object-fit: contain;
+    }
+
+    .logo-fallback {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #4f46e5;
+      display: none;
+    }
+
+    .site-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* 메인 컨테이너 */
+    main {
+      flex: 1;
+      max-width: 1080px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .hero-section {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .hero-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 0.95rem;
+      color: #64748b;
+    }
+
+    /* 반응형 앱 레이아웃 */
+    .app-layout {
+      display: flex;
+      gap: 24px;
+      width: 100%;
+    }
+
+    @media (max-width: 860px) {
+      .app-layout {
+        flex-direction: column;
+      }
+    }
+
+    /* 좌측/입력 설정 카카오 카드 */
+    .setup-panel {
+      width: 320px;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    @media (max-width: 860px) {
+      .setup-panel { width: 100%; }
+    }
+
+    .panel-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 220px;
+      border: 1px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: #0f172a;
+      outline: none;
+      resize: vertical;
+      background: #ffffff;
+      line-height: 1.6;
+    }
+
+    textarea:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .btn-start {
+      width: 100%;
+      padding: 15px;
+      border-radius: 100px;
+      border: none;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-start:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(79, 70, 229, 0.45);
+    }
+
+    /* 실시간 탈락/도착 리더보드 */
+    .leaderboard-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .rank-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background: #ffffff;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .rank-item.last-winner {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #ef4444;
+      font-weight: 800;
+    }
+
+    /* 우측 구슬 드롭 물리 캔버스 구역 */
+    .game-panel {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 28px;
+      padding: 20px;
+      box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 580px;
+    }
+
+    canvas {
+      background: #0f172a;
+      border-radius: 20px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+      max-width: 100%;
+    }
+
+    /* 최종 당첨자 팝업 모달 오버레이 */
+    .winner-modal-overlay {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      border-radius: 28px;
+      z-index: 10;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      animation: fadeIn 0.4s ease;
+      text-align: center;
+      color: #ffffff;
+      padding: 20px;
+    }
+
+    .winner-crown {
+      font-size: 3.5rem;
+      color: #f59e0b;
+      animation: bounce 1s infinite alternate;
+    }
+
+    .winner-name-val {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-12px); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header>
+    <div class="header-logo">
+      <a href="https://nanalab.kr" target="_blank" rel="noopener noreferrer">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='inline';">
+        <span id="fallback-logo" class="logo-fallback">NANALAB</span>
+      </a>
+    </div>
+    <div class="site-title">Marble Drop Lottery</div>
+  </header>
+
+  <!-- 메인 영역 -->
+  <main>
+    
+    <div class="hero-section">
+      <h1 class="hero-title">구슬 드롭 장애물 추첨기</h1>
+      <p class="hero-sub">장애물을 통과해 <b>가장 마지막에 떨어지는 사람</b>이 최종 당첨자입니다!</p>
+    </div>
+
+    <div class="app-layout">
+      
+      <!-- 좌측 입력 및 설정 카드 -->
+      <div class="setup-panel">
+        <div class="panel-title">
+          <i class="fa-solid fa-users" style="color: #6366f1;"></i> 참가자 명단 입력
+        </div>
+        <textarea id="input-names" placeholder="이름을 줄바꿈으로 구분하여 입력하세요...&#10;예:&#10;김철수&#10;이영희&#10;박민수&#10;최지훈&#10;정수진"></textarea>
+
+        <button type="button" class="btn-start" onclick="startLottery()">
+          <i class="fa-solid fa-circle-play"></i> 구슬 발사 & 추첨 시작!
+        </button>
+
+        <!-- 실시간 도달/탈락 리더보드 -->
+        <div class="panel-title" style="margin-top: 6px;">
+          <i class="fa-solid fa-trophy" style="color: #f59e0b;"></i> 골인 현황 (도달 순)
+        </div>
+        <div class="leaderboard-box" id="leaderboard">
+          <div style="font-size: 0.8rem; color: #94a3b8; text-align: center;">추첨을 시작하면 현황이 표시됩니다.</div>
+        </div>
+      </div>
+
+      <!-- 우측 Canvas 게임 물리 엔진 디스플레이 -->
+      <div class="game-panel">
+        <canvas id="canvas" width="500" height="620"></canvas>
+
+        <!-- 최종 당첨자 축하 모달 -->
+        <div class="winner-modal-overlay" id="winner-modal">
+          <div class="winner-crown"><i class="fa-solid fa-crown"></i></div>
+          <div style="font-size: 1.1rem; font-weight: 700; color: #fcd34d;">축하합니다! 최종 당첨자</div>
+          <div class="winner-name-val" id="winner-name">김철수</div>
+          <button type="button" class="btn-start" style="width: auto; padding: 12px 32px; margin-top: 10px;" onclick="closeModal()">
+            <i class="fa-solid fa-arrow-rotate-left"></i> 확인 및 다시 추첨
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // 마우스 추적 인터랙션
+    document.addEventListener('mousemove', (e) => {
+      const xPercent = (e.clientX / window.innerWidth) * 100;
+      const yPercent = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty('--mouse-x', `${xPercent}%`);
+      document.documentElement.style.setProperty('--mouse-y', `${yPercent}%`);
+    });
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const inputNames = document.getElementById('input-names');
+    const leaderboard = document.getElementById('leaderboard');
+    const winnerModal = document.getElementById('winner-modal');
+    const winnerName = document.getElementById('winner-name');
+
+    // 기본 이름 세팅
+    inputNames.value = "김철수\n이영희\n박민수\n최지훈\n정수진\n강동원";
+
+    const colors = [
+      '#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4',
+      '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#14b8a6'
+    ];
+
+    let marbles = [];
+    let pins = [];
+    let finishedRank = [];
+    let totalCount = 0;
+    let animationFrameId = null;
+    let isRunning = false;
+
+    // 핀(장애물) 격자 생성
+    function initPins() {
+      pins = [];
+      const rows = 9;
+      const startY = 100;
+      const spacingY = 50;
+
+      for (let r = 0; r < rows; r++) {
+        const cols = (r % 2 === 0) ? 8 : 7;
+        const spacingX = canvas.width / (cols + 1);
+        for (let c = 0; c < cols; c++) {
+          const x = spacingX * (c + 1);
+          const y = startY + r * spacingY;
+          pins.push({ x, y, radius: 5 });
+        }
+      }
+    }
+
+    // 구슬 개별 객체
+    class Marble {
+      constructor(name, color, index, total) {
+        this.name = name;
+        this.color = color;
+        this.radius = 12;
+
+        // 상단 부근에서 난수로 발사 위치 배정
+        this.x = (canvas.width / (total + 1)) * (index + 1) + (Math.random() * 20 - 10);
+        this.y = 30 + Math.random() * 20;
+
+        this.vx = (Math.random() - 0.5) * 3;
+        this.vy = Math.random() * 2;
+        this.finished = false;
+      }
+
+      update() {
+        if (this.finished) return;
+
+        // 중력 및 마찰 적용
+        this.vy += 0.18;
+        this.vx *= 0.99;
+        this.vy *= 0.99;
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // 좌우 벽 충돌
+        if (this.x - this.radius < 10) {
+          this.x = 10 + this.radius;
+          this.vx *= -0.7;
+        } else if (this.x + this.radius > canvas.width - 10) {
+          this.x = canvas.width - 10 - this.radius;
+          this.vx *= -0.7;
+        }
+
+        // 핀 장애물과 충돌 반응
+        for (let pin of pins) {
+          const dx = this.x - pin.x;
+          const dy = this.y - pin.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < this.radius + pin.radius) {
+            const angle = Math.atan2(dy, dx);
+            const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+            const bounceSpeed = Math.max(speed, 2.5);
+
+            this.vx = Math.cos(angle) * bounceSpeed * 0.8 + (Math.random() - 0.5) * 0.5;
+            this.vy = Math.sin(angle) * bounceSpeed * 0.8;
+
+            // 위치 보정
+            const overlap = (this.radius + pin.radius) - dist;
+            this.x += Math.cos(angle) * overlap;
+            this.y += Math.sin(angle) * overlap;
+          }
+        }
+
+        // 하단 골인 도달 판정 (y > 560)
+        if (this.y >= 560) {
+          this.y = 560;
+          this.finished = true;
+          finishedRank.push(this);
+          updateLeaderboard();
+
+          // 모든 구슬이 낙하 완료되었을 때 -> 가장 마지막에 도착한 사람 당첨!
+          if (finishedRank.length === totalCount) {
+            setTimeout(showWinner, 600);
+          }
+        }
+      }
+
+      draw() {
+        ctx.save();
+
+        // 구슬 그림자
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 8;
+
+        // 구슬 본체 3D 그라데이션
+        const grad = ctx.createRadialGradient(
+          this.x - 3, this.y - 3, 2,
+          this.x, this.y, this.radius
+        );
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.4, this.color);
+        grad.addColorStop(1, '#000000');
+
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.restore();
+
+        // 구슬 아래 이름 텍스트 라벨
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px Pretendard';
+        ctx.textAlign = 'center';
+        ctx.fillText(this.name, this.x, this.y - 16);
+      }
+    }
+
+    // 메인 그리기 프레임 루프
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 외곽 테두리 맵
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
+
+      // 하단 골인 구역 표시
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+      ctx.fillRect(5, 540, canvas.width - 10, 70);
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 12px Pretendard';
+      ctx.textAlign = 'center';
+      ctx.fillText('GOAL (하단 도착 구역)', canvas.width / 2, 580);
+
+      // 핀 장애물 그리기
+      for (let pin of pins) {
+        ctx.beginPath();
+        ctx.arc(pin.x, pin.y, pin.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fill();
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // 구슬 업데이트 및 그리기
+      for (let marble of marbles) {
+        marble.update();
+        marble.draw();
+      }
+
+      if (isRunning) {
+        animationFrameId = requestAnimationFrame(draw);
+      }
+    }
+
+    // 리더보드 실시간 갱신
+    function updateLeaderboard() {
+      leaderboard.innerHTML = '';
+      finishedRank.forEach((item, idx) => {
+        const isLast = (finishedRank.length === totalCount && idx === totalCount - 1);
+        const rankHTML = `
+          <div class="rank-item ${isLast ? 'last-winner' : ''}">
+            <span>${idx + 1}등 도달: <b>${item.name}</b></span>
+            <span>${isLast ? '★ 최종 당첨!' : '탈락'}</span>
+          </div>
+        `;
+        leaderboard.insertAdjacentHTML('beforeend', rankHTML);
+      });
+    }
+
+    // 추첨 시작
+    function startLottery() {
+      const names = inputNames.value.split('\n').map(n => n.trim()).filter(n => n !== '');
+      if (names.length < 2) {
+        alert('추첨을 진행하려면 최소 2명 이상의 이름을 입력해야 합니다.');
+        return;
+      }
+
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+      initPins();
+      finishedRank = [];
+      totalCount = names.length;
+      marbles = names.map((name, i) => new Marble(name, colors[i % colors.length], i, totalCount));
+
+      leaderboard.innerHTML = `<div style="font-size: 0.8rem; color: #6366f1; text-align: center; font-weight:700;">구슬들이 장애물을 통과 중입니다...</div>`;
+      winnerModal.style.display = 'none';
+
+      isRunning = true;
+      draw();
+    }
+
+    // 가장 마지막에 들어온 사람 당첨 팝업 노출
+    function showWinner() {
+      isRunning = false;
+      const winner = finishedRank[finishedRank.length - 1];
+      winnerName.innerText = winner.name;
+      winnerModal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      winnerModal.style.display = 'none';
+    }
+
+    // 초기 핀 배치
+    initPins();
+    draw();
+  </script>
+</body>
+</html>

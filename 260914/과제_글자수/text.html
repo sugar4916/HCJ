@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Text & Byte Counter</title>
+
+  <!-- Pretendard 폰트 & FontAwesome 아이콘 라이브러리 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1e293b;
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(199, 210, 254, 0.75) 0%, rgba(243, 232, 255, 0.45) 30%, rgba(254, 242, 242, 0.1) 60%),
+        linear-gradient(135deg, #f0f7ff 0%, #f5f3ff 50%, #fef2f2 100%);
+      background-attachment: fixed;
+    }
+
+    /* 상단 헤더 */
+    header {
+      width: 100%;
+      height: 72px;
+      padding: 0 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      z-index: 100;
+    }
+
+    .header-logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      height: 38px;
+      object-fit: contain;
+    }
+
+    .logo-fallback {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #4f46e5;
+      display: none;
+    }
+
+    .site-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* 메인 컨테이너 */
+    main {
+      flex: 1;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .hero-section {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hero-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 0.95rem;
+      color: #64748b;
+    }
+
+    /* 실시간 메트릭 대시보드 카운터 */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 18px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card.primary {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+    }
+
+    .metric-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .metric-card.primary .metric-label {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+    }
+
+    .metric-card.primary .metric-value {
+      color: #ffffff;
+    }
+
+    .metric-unit {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-left: 2px;
+    }
+
+    /* 텍스트 입력 에디터 카드 */
+    .editor-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .editor-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .editor-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tool-btn {
+      padding: 7px 14px;
+      border-radius: 100px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .tool-btn:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .tool-btn.primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+
+    .tool-btn.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+    }
+
+    /* 입력 텍스트 에어리어 */
+    textarea {
+      width: 100%;
+      height: 320px;
+      border: 1px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 18px;
+      font-size: 1rem;
+      line-height: 1.6;
+      font-family: inherit;
+      color: #0f172a;
+      outline: none;
+      resize: vertical;
+      background: #ffffff;
+      transition: border-color 0.2s ease;
+    }
+
+    textarea:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    textarea::placeholder {
+      color: #94a3b8;
+    }
+
+    /* 한글 2Byte 안내 뱃지 */
+    .byte-info-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #15803d;
+      padding: 10px 16px;
+      border-radius: 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header>
+    <div class="header-logo">
+      <a href="https://nanalab.kr" target="_blank" rel="noopener noreferrer">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='inline';">
+        <span id="fallback-logo" class="logo-fallback">NANALAB</span>
+      </a>
+    </div>
+    <div class="site-title">Smart Text & Byte Counter</div>
+  </header>
+
+  <!-- 메인 영역 -->
+  <main>
+    
+    <div class="hero-section">
+      <h1 class="hero-title">실시간 글자 수 & 바이트 계산기</h1>
+      <p class="hero-sub">텍스트를 입력하면 글자 수와 바이트(Byte) 수가 실시간으로 정확하게 측정됩니다.</p>
+    </div>
+
+    <!-- 실시간 메트릭 대시보드 -->
+    <div class="metrics-grid">
+      
+      <!-- 1. 바이트 수 (한글 2Byte 적용) -->
+      <div class="metric-card primary">
+        <span class="metric-label"><i class="fa-solid fa-hard-drive"></i> 용량 (한글 2Byte 기준)</span>
+        <div>
+          <span class="metric-value" id="val-bytes">0</span>
+          <span class="metric-unit">Bytes</span>
+        </div>
+      </div>
+
+      <!-- 2. 공백 포함 글자 수 -->
+      <div class="metric-card">
+        <span class="metric-label"><i class="fa-solid fa-font"></i> 공백 포함 글자 수</span>
+        <div>
+          <span class="metric-value" id="val-char-with-space">0</span>
+          <span class="metric-unit">자</span>
+        </div>
+      </div>
+
+      <!-- 3. 공백 제외 글자 수 -->
+      <div class="metric-card">
+        <span class="metric-label"><i class="fa-solid fa-italic"></i> 공백 제외 글자 수</span>
+        <div>
+          <span class="metric-value" id="val-char-no-space">0</span>
+          <span class="metric-unit">자</span>
+        </div>
+      </div>
+
+      <!-- 4. 단어 수 / 줄 수 -->
+      <div class="metric-card">
+        <span class="metric-label"><i class="fa-solid fa-align-left"></i> 단어 수 / 줄 수</span>
+        <div>
+          <span class="metric-value" id="val-words-lines">0 / 0</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 에디터 영역 -->
+    <div class="editor-card">
+      <div class="editor-toolbar">
+        <div class="editor-title">
+          <i class="fa-solid fa-pen-to-square" style="color: #6366f1;"></i> 텍스트 입력
+        </div>
+        <div class="btn-group">
+          <button class="tool-btn" onclick="clearText()"><i class="fa-solid fa-trash-can"></i> 전체 지우기</button>
+          <button class="tool-btn primary" onclick="copyText()"><i class="fa-solid fa-copy"></i> 복사하기</button>
+        </div>
+      </div>
+
+      <textarea id="text-input" placeholder="여기에 텍스트를 입력하거나 붙여넣으세요..."></textarea>
+
+      <!-- 한글 2Byte 규칙 명시 안내 -->
+      <div class="byte-info-badge">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>계산 규칙: 한글 및 특수문자 = <b>2 Bytes</b> / 영문, 숫자, 공백 = <b>1 Byte</b> / 줄바꿈(엔터) = <b>2 Bytes (CRLF)</b> 기준입니다.</span>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // 마우스 추적 파스텔 배경 인터랙션
+    document.addEventListener('mousemove', (e) => {
+      const xPercent = (e.clientX / window.innerWidth) * 100;
+      const yPercent = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty('--mouse-x', `${xPercent}%`);
+      document.documentElement.style.setProperty('--mouse-y', `${yPercent}%`);
+    });
+
+    const textInput = document.getElementById('text-input');
+    const valBytes = document.getElementById('val-bytes');
+    const valCharWithSpace = document.getElementById('val-char-with-space');
+    const valCharNoSpace = document.getElementById('val-char-no-space');
+    const valWordsLines = document.getElementById('val-words-lines');
+
+    // 한글 2Byte 기준 정확한 바이트 계산 함수
+    function calculateBytes(str) {
+      let bytes = 0;
+      for (let i = 0; i < str.length; i++) {
+        const charCode = str.charCodeAt(i);
+        
+        // 엔터 키 (줄바꿈 \n) = 2바이트 (CRLF 표준)
+        if (charCode === 10) {
+          bytes += 2;
+        } 
+        // 한글 및 조합형, 한자 등 2바이트 영역 (유니코드 128 이상)
+        else if (charCode > 127) {
+          bytes += 2;
+        } 
+        // 영문, 숫자, 일반 공백, 기본 기호 = 1바이트
+        else {
+          bytes += 1;
+        }
+      }
+      return bytes;
+    }
+
+    // 실시간 카운트 업데이트
+    function updateCounts() {
+      const text = textInput.value;
+
+      // 1. 공백 포함 글자 수
+      const charWithSpaceCount = text.length;
+
+      // 2. 공백 제외 글자 수 (공백, 줄바꿈, 탭 제거)
+      const charNoSpaceCount = text.replace(/[\s\r\n]/g, '').length;
+
+      // 3. 바이트 수 (한글 2Byte)
+      const byteCount = calculateBytes(text);
+
+      // 4. 단어 수
+      const wordsCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+
+      // 5. 줄 수
+      const linesCount = text === '' ? 0 : text.split('\n').length;
+
+      // UI 렌더링 (천 단위 콤마)
+      valBytes.innerText = byteCount.toLocaleString();
+      valCharWithSpace.innerText = charWithSpaceCount.toLocaleString();
+      valCharNoSpace.innerText = charNoSpaceCount.toLocaleString();
+      valWordsLines.innerText = `${wordsCount.toLocaleString()} 단어 / ${linesCount.toLocaleString()} 줄`;
+    }
+
+    textInput.addEventListener('input', updateCounts);
+
+    // 전체 지우기
+    function clearText() {
+      textInput.value = '';
+      updateCounts();
+      textInput.focus();
+    }
+
+    // 클립보드 복사
+    function copyText() {
+      if (!textInput.value) {
+        alert('복사할 텍스트가 없습니다.');
+        return;
+      }
+      navigator.clipboard.writeText(textInput.value).then(() => {
+        alert('텍스트가 클립보드에 복사되었습니다!');
+      });
+    }
+  </script>
+</body>
+</html>

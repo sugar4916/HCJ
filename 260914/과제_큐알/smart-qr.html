@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart QR - 스마트 QR코드 생성기</title>
+
+  <!-- Pretendard 폰트 & FontAwesome 아이콘 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 기본 변수 (마우스 위치 동적 추적용) */
+    :root {
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      color: #1e293b;
+      
+      /* 마우스 커서 위치에 따라 빛의 위치와 그라데이션이 이동하는 인터랙티브 배경 */
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(199, 210, 254, 0.75) 0%, rgba(243, 232, 255, 0.45) 30%, rgba(254, 242, 242, 0.1) 60%),
+        linear-gradient(135deg, #f0f7ff 0%, #f5f3ff 50%, #fef2f2 100%);
+      transition: background 0.05s ease-out;
+    }
+
+    /* 1 & 2. 상단 헤더 (화사한 반투명 유리 효과) */
+    header {
+      width: 100%;
+      height: 72px;
+      padding: 0 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      z-index: 10;
+    }
+
+    .header-logo svg {
+      width: 32px;
+      height: 32px;
+      display: block;
+    }
+
+    .site-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* 메인 영역 */
+    main {
+      flex: 1;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 4. QR 코드 카드 (정중앙 위치 & 애니메이션) */
+    .qr-container {
+      position: absolute;
+      top: 38%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    body.has-qr .qr-container {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* 5. QR 카드 클릭 호버 및 다운로드 스타일 */
+    .qr-card-wrapper {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      padding: 24px;
+      border-radius: 28px;
+      box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.12),
+                  0 0 0 1px rgba(255, 255, 255, 1);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .qr-card-wrapper:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 25px 50px -10px rgba(99, 102, 241, 0.25),
+                  0 0 0 2px #6366f1;
+    }
+
+    #qrcode img, #qrcode canvas {
+      display: block;
+      border-radius: 12px;
+    }
+
+    /* 다운로드 안내 뱃지 */
+    .download-badge {
+      margin-top: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #475569;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 10px 22px;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.03);
+    }
+
+    .download-badge i {
+      color: #6366f1;
+    }
+
+    /* 3. URL 입력창 카드 */
+    .input-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 500px;
+      transition: top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.has-qr .input-container {
+      top: 80%;
+    }
+
+    .input-box {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      padding: 8px 8px 8px 20px;
+      border-radius: 100px;
+      box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.1),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      transition: all 0.3s ease;
+    }
+
+    .input-box:focus-within {
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 20px 40px -5px rgba(99, 102, 241, 0.22),
+                  0 0 0 2px #6366f1;
+    }
+
+    .input-box i.link-icon {
+      color: #a5b4fc;
+      font-size: 1.1rem;
+      margin-right: 12px;
+    }
+
+    .input-box input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 1rem;
+      font-family: inherit;
+      color: #1e293b;
+    }
+
+    .input-box input::placeholder {
+      color: #94a3b8;
+    }
+
+    .input-box button {
+      border: none;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      padding: 14px 28px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      border-radius: 100px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(79, 70, 229, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .input-box button:hover {
+      background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(79, 70, 229, 0.4);
+    }
+
+    .input-box button:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header>
+    <!-- 1. 좌측 로고 -->
+    <div class="header-logo">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="8" height="8" rx="2" stroke="#4F46E5" stroke-width="2.2"/>
+        <rect x="4.5" y="4.5" width="3" height="3" rx="0.5" fill="#7C3AED"/>
+        <rect x="14" y="2" width="8" height="8" rx="2" stroke="#4F46E5" stroke-width="2.2"/>
+        <rect x="16.5" y="4.5" width="3" height="3" rx="0.5" fill="#7C3AED"/>
+        <rect x="2" y="14" width="8" height="8" rx="2" stroke="#4F46E5" stroke-width="2.2"/>
+        <rect x="4.5" y="16.5" width="3" height="3" rx="0.5" fill="#7C3AED"/>
+        <rect x="14" y="14" width="3.5" height="3.5" rx="0.8" fill="#4F46E5"/>
+        <rect x="18.5" y="14" width="3.5" height="3.5" rx="0.8" fill="#7C3AED"/>
+        <rect x="14" y="18.5" width="3.5" height="3.5" rx="0.8" fill="#7C3AED"/>
+        <rect x="18.5" y="18.5" width="3.5" height="3.5" rx="0.8" fill="#4F46E5"/>
+      </svg>
+    </div>
+    <!-- 2. 우측 이름 -->
+    <div class="site-title">Smart QR</div>
+  </header>
+
+  <!-- 메인 영역 -->
+  <main>
+    <!-- 4 & 5. QR 코드 영역 -->
+    <div class="qr-container">
+      <div class="qr-card-wrapper" id="qr-card" title="클릭하여 JPG 다운로드">
+        <div id="qrcode"></div>
+      </div>
+      <div class="download-badge">
+        <i class="fa-solid fa-arrow-down-to-line"></i>
+        <span>QR 코드를 클릭하면 JPG 파일로 저장됩니다</span>
+      </div>
+    </div>
+
+    <!-- 3. URL 입력창 -->
+    <div class="input-container">
+      <form onsubmit="event.preventDefault(); generateQR();">
+        <div class="input-box">
+          <i class="fa-solid fa-link link-icon"></i>
+          <input type="url" id="url-input" placeholder="https://example.com" required autocomplete="off">
+          <button type="submit">확인</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    // 마우스 커서 위치에 따른 그라데이션 동적 변환 스크립트
+    document.addEventListener('mousemove', (e) => {
+      const xPercent = (e.clientX / window.innerWidth) * 100;
+      const yPercent = (e.clientY / window.innerHeight) * 100;
+      
+      document.documentElement.style.setProperty('--mouse-x', `${xPercent}%`);
+      document.documentElement.style.setProperty('--mouse-y', `${yPercent}%`);
+    });
+
+    // QR코드 생성 함수
+    function generateQR() {
+      const url = document.getElementById('url-input').value.trim();
+      if (!url) return;
+
+      const qrContainer = document.getElementById('qrcode');
+      qrContainer.innerHTML = '';
+
+      new QRCode(qrContainer, {
+        text: url,
+        width: 190,
+        height: 190,
+        colorDark : "#1e1b4b",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+      });
+
+      document.body.classList.add('has-qr');
+    }
+
+    // QR 카드 클릭 시 JPG 다운로드
+    document.getElementById('qr-card').addEventListener('click', function () {
+      const qrContainer = document.getElementById('qrcode');
+      const canvas = qrContainer.querySelector('canvas');
+      const img = qrContainer.querySelector('img');
+      const src = canvas || img;
+
+      if (!src) return;
+
+      const downloadCanvas = document.createElement('canvas');
+      const size = 240;
+      const padding = 24;
+      
+      downloadCanvas.width = size;
+      downloadCanvas.height = size;
+      const ctx = downloadCanvas.getContext('2d');
+
+      // 여백 및 배경 채우기
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(src, padding, padding, size - (padding * 2), size - (padding * 2));
+
+      // JPG 저장
+      const link = document.createElement('a');
+      link.href = downloadCanvas.toDataURL('image/jpeg', 1.0);
+      link.download = 'Smart_QR.jpg';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  </script>
+</body>
+</html>

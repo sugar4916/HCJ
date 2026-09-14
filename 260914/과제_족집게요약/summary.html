@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart TextRank Document Summarizer</title>
+
+  <!-- Pretendard 폰트 & FontAwesome 아이콘 라이브러리 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- PDF.js (PDF 문서 텍스트 파싱용) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <!-- Mammoth.js (DOCX 문서 텍스트 파싱용) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1e293b;
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(199, 210, 254, 0.75) 0%, rgba(243, 232, 255, 0.45) 30%, rgba(254, 242, 242, 0.1) 60%),
+        linear-gradient(135deg, #f0f7ff 0%, #f5f3ff 50%, #fef2f2 100%);
+      background-attachment: fixed;
+    }
+
+    /* 상단 헤더 */
+    header {
+      width: 100%;
+      height: 72px;
+      padding: 0 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      z-index: 100;
+    }
+
+    .header-logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      height: 38px;
+      object-fit: contain;
+    }
+
+    .logo-fallback {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #4f46e5;
+      display: none;
+    }
+
+    .site-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* 메인 콘텐츠 */
+    main {
+      flex: 1;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .hero-section {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hero-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 0.95rem;
+      color: #64748b;
+    }
+
+    /* 업로드 영역 카드 */
+    .dropzone {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 2px dashed #a5b4fc;
+      border-radius: 28px;
+      padding: 48px 24px;
+      text-align: center;
+      box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: #6366f1;
+      background: rgba(255, 255, 255, 0.95);
+      transform: translateY(-2px);
+      box-shadow: 0 25px 50px -10px rgba(99, 102, 241, 0.18),
+                  0 0 0 2px #6366f1;
+    }
+
+    .dropzone-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6366f1;
+      font-size: 1.6rem;
+    }
+
+    .dropzone-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+
+    .dropzone-sub {
+      font-size: 0.88rem;
+      color: #64748b;
+      margin-bottom: 24px;
+    }
+
+    .btn-select {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      padding: 13px 30px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(79, 70, 229, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-select:hover {
+      background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+      transform: translateY(-1px);
+    }
+
+    #file-input { display: none; }
+
+    /* 컨트롤 & 결과 요약 패널 */
+    .summary-section {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .control-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 24px 28px;
+      box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .control-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sentence-badge {
+      background: #e0e7ff;
+      color: #4338ca;
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .slider-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .slider-wrapper span {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      height: 8px;
+      border-radius: 100px;
+      background: #e2e8f0;
+      outline: none;
+      accent-color: #6366f1;
+      cursor: pointer;
+    }
+
+    /* 요약 결과 출력 카드 */
+    .result-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 14px;
+    }
+
+    .result-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-copy {
+      padding: 8px 18px;
+      border-radius: 100px;
+      border: none;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    .btn-copy:hover {
+      transform: translateY(-1px);
+    }
+
+    /* 요약 리스트 문장들 */
+    .summary-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .summary-item {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 16px 20px;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #334155;
+      display: flex;
+      gap: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .summary-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #e0e7ff;
+      color: #4f46e5;
+      font-size: 0.8rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .btn-reset {
+      align-self: center;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 10px 24px;
+      border-radius: 100px;
+      color: #475569;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-reset:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header>
+    <div class="header-logo">
+      <a href="https://nanalab.kr" target="_blank" rel="noopener noreferrer">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='inline';">
+        <span id="fallback-logo" class="logo-fallback">NANALAB</span>
+      </a>
+    </div>
+    <div class="site-title">TextRank Summarizer</div>
+  </header>
+
+  <!-- 메인 영역 -->
+  <main>
+
+    <div class="hero-section">
+      <h1 class="hero-title">TextRank 문서 요약기</h1>
+      <p class="hero-sub">PDF, Word 문서에서 TextRank 알고리즘으로 핵심 문장만 요약합니다.</p>
+    </div>
+
+    <!-- 업로드 드래그 앤 드롭 영역 -->
+    <div class="dropzone" id="dropzone">
+      <div class="dropzone-icon">
+        <i class="fa-solid fa-file-arrow-up"></i>
+      </div>
+      <div class="dropzone-title">Upload PDF or DOCX file</div>
+      <div class="dropzone-sub">PDF (.pdf), Word (.docx), 텍스트 (.txt) 파일 요약을 지원합니다</div>
+      <button type="button" class="btn-select" onclick="document.getElementById('file-input').click();">
+        <i class="fa-solid fa-folder-open"></i> 문서 파일 선택하기
+      </button>
+      <input type="file" id="file-input" accept=".pdf, .docx, .txt">
+    </div>
+
+    <!-- 컨트롤 & 요약 결과 섹션 -->
+    <div class="summary-section" id="summary-section">
+      
+      <!-- 문장 수 조절 슬라이더 (최소 1문장 ~ 최대 5문장) -->
+      <div class="control-card">
+        <div class="control-header">
+          <div class="control-label">
+            <i class="fa-solid fa-sliders" style="color: #6366f1;"></i> 요약 분량 선택
+          </div>
+          <div class="sentence-badge" id="sentence-count-badge">3문장 요약</div>
+        </div>
+
+        <div class="slider-wrapper">
+          <span>1문장</span>
+          <input type="range" id="sentence-slider" min="1" max="5" value="3">
+          <span>5문장</span>
+        </div>
+      </div>
+
+      <!-- 요약 결과 출력 -->
+      <div class="result-card">
+        <div class="result-header">
+          <div class="result-title">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color: #6366f1;"></i> TextRank 추출 요약문
+          </div>
+          <button class="btn-copy" onclick="copySummary()"><i class="fa-solid fa-copy"></i> 복사하기</button>
+        </div>
+
+        <div class="summary-list" id="summary-list"></div>
+
+        <button type="button" class="btn-reset" onclick="resetSummarizer()">
+          <i class="fa-solid fa-arrow-rotate-left"></i> 다른 문서 요약하기
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // PDF.js worker 설정
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+    let extractedSentences = [];
+    let sentenceScores = [];
+
+    // 마우스 추적 인터랙션
+    document.addEventListener('mousemove', (e) => {
+      const xPercent = (e.clientX / window.innerWidth) * 100;
+      const yPercent = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty('--mouse-x', `${xPercent}%`);
+      document.documentElement.style.setProperty('--mouse-y', `${yPercent}%`);
+    });
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const summarySection = document.getElementById('summary-section');
+    const sentenceSlider = document.getElementById('sentence-slider');
+    const sentenceBadge = document.getElementById('sentence-count-badge');
+    const summaryList = document.getElementById('summary-list');
+
+    // 드래그 앤 드롭 이벤트
+    ['dragenter', 'dragover'].forEach(name => {
+      dropzone.addEventListener(name, (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      dropzone.addEventListener(name, (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files.length > 0) processDocument(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        processDocument(e.target.files[0]);
+        fileInput.value = '';
+      }
+    });
+
+    // 파일별 텍스트 추출
+    async function processDocument(file) {
+      const fileName = file.name.toLowerCase();
+      let fullText = "";
+
+      try {
+        if (fileName.endsWith('.txt')) {
+          fullText = await file.text();
+        } else if (fileName.endsWith('.docx')) {
+          const arrayBuffer = await file.arrayBuffer();
+          const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+          fullText = result.value;
+        } else if (fileName.endsWith('.pdf')) {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map(item => item.str).join(' ');
+            fullText += pageText + " ";
+          }
+        } else {
+          alert('PDF, DOCX, TXT 파일만 지원합니다.');
+          return;
+        }
+
+        runTextRank(fullText);
+
+      } catch (err) {
+        console.error(err);
+        alert('문서를 다루는 동안 오류가 발생했습니다.');
+      }
+    }
+
+    // ==========================================
+    // JS TextRank 알고리즘 구현
+    // ==========================================
+    function runTextRank(text) {
+      // 1. 문장 분할 (마침표, 물음표, 느낌표, 줄바꿈 기준)
+      const rawSentences = text
+        .split(/(?<=[.!?])\s+|\n+/)
+        .map(s => s.trim())
+        .filter(s => s.length > 15); // 의미 있는 길이의 문장만 필터링
+
+      if (rawSentences.length === 0) {
+        alert('요약할 텍스트가 충분하지 않습니다.');
+        return;
+      }
+
+      extractedSentences = rawSentences;
+
+      // 2. 문장별 단어 토큰 생성
+      const tokenized = rawSentences.map(s => {
+        return s.replace(/[^a-zA-Z0-9가-힣\s]/g, '')
+          .toLowerCase()
+          .split(/\s+/)
+          .filter(w => w.length > 1);
+      });
+
+      const n = rawSentences.length;
+      let simMatrix = Array.from({ length: n }, () => Array(n).fill(0));
+
+      // 3. Jaccard 유사도 행렬 계산
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+          if (i === j) continue;
+          const setA = new Set(tokenized[i]);
+          const setB = new Set(tokenized[j]);
+          
+          let intersection = 0;
+          setA.forEach(word => { if (setB.has(word)) intersection++; });
+
+          const union = setA.size + setB.size - intersection;
+          simMatrix[i][j] = union > 0 ? intersection / union : 0;
+        }
+      }
+
+      // 4. PageRank 파동 연산 (damping factor d = 0.85)
+      const d = 0.85;
+      let scores = Array(n).fill(1.0);
+
+      for (let iter = 0; iter < 30; iter++) {
+        let newScores = Array(n).fill(1 - d);
+        for (let i = 0; i < n; i++) {
+          let sum = 0;
+          for (let j = 0; j < n; j++) {
+            if (i === j) continue;
+            let weightSum = simMatrix[j].reduce((a, b) => a + b, 0);
+            if (weightSum > 0) {
+              sum += (simMatrix[j][i] / weightSum) * scores[j];
+            }
+          }
+          newScores[i] += d * sum;
+        }
+        scores = newScores;
+      }
+
+      sentenceScores = scores.map((score, idx) => ({ index: idx, score: score, text: rawSentences[idx] }));
+
+      // UI 노출
+      dropzone.style.display = 'none';
+      summarySection.style.display = 'flex';
+
+      renderSummary();
+    }
+
+    // 요약 결과 렌더링
+    function renderSummary() {
+      const count = parseInt(sentenceSlider.value);
+      sentenceBadge.innerText = `${count}문장 요약`;
+
+      // 점수 높은 순 정렬 후 상위 count개 선택 -> 문맥을 위해 다시 원래 문장 순서로 정렬
+      const topSentences = [...sentenceScores]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, count)
+        .sort((a, b) => a.index - b.index);
+
+      summaryList.innerHTML = '';
+      topSentences.forEach((item, i) => {
+        const itemHTML = `
+          <div class="summary-item">
+            <div class="summary-num">${i + 1}</div>
+            <div>${item.text}</div>
+          </div>
+        `;
+        summaryList.insertAdjacentHTML('beforeend', itemHTML);
+      });
+    }
+
+    sentenceSlider.addEventListener('input', renderSummary);
+
+    function copySummary() {
+      const textToCopy = Array.from(document.querySelectorAll('.summary-item'))
+        .map(el => el.innerText.replace(/^\d+\n/, ''))
+        .join('\n\n');
+
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        alert('요약 문장이 클립보드에 복사되었습니다!');
+      });
+    }
+
+    function resetSummarizer() {
+      dropzone.style.display = 'block';
+      summarySection.style.display = 'none';
+    }
+  </script>
+</body>
+</html>

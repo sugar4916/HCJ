@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOCX Document Analyzer</title>
+
+  <!-- Pretendard 폰트 & FontAwesome 아이콘 라이브러리 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Mammoth.js 라이브러리 (DOCX 문서 본문 및 이미지 파싱용) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1e293b;
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(199, 210, 254, 0.75) 0%, rgba(243, 232, 255, 0.45) 30%, rgba(254, 242, 242, 0.1) 60%),
+        linear-gradient(135deg, #f0f7ff 0%, #f5f3ff 50%, #fef2f2 100%);
+      background-attachment: fixed;
+    }
+
+    /* 상단 헤더 */
+    header {
+      width: 100%;
+      height: 72px;
+      padding: 0 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      z-index: 100;
+    }
+
+    .header-logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      height: 38px;
+      object-fit: contain;
+    }
+
+    .logo-fallback {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #4f46e5;
+      display: none;
+    }
+
+    .site-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* 메인 콘텐츠 */
+    main {
+      flex: 1;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .hero-section {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hero-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 0.95rem;
+      color: #64748b;
+    }
+
+    /* 업로드 드래그 앤 드롭 구역 */
+    .dropzone {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 2px dashed #a5b4fc;
+      border-radius: 28px;
+      padding: 48px 24px;
+      text-align: center;
+      box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: #6366f1;
+      background: rgba(255, 255, 255, 0.95);
+      transform: translateY(-2px);
+      box-shadow: 0 25px 50px -10px rgba(99, 102, 241, 0.18),
+                  0 0 0 2px #6366f1;
+    }
+
+    .dropzone-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2563eb;
+      font-size: 1.6rem;
+    }
+
+    .dropzone-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+
+    .dropzone-sub {
+      font-size: 0.88rem;
+      color: #64748b;
+      margin-bottom: 24px;
+    }
+
+    .btn-select {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      color: #ffffff;
+      padding: 13px 30px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-select:hover {
+      background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%);
+      transform: translateY(-1px);
+    }
+
+    #file-input { display: none; }
+
+    /* ==========================================
+       분석 결과 대시보드
+       ========================================== */
+    .result-section {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .file-meta-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 16px 24px;
+      border: 1px solid rgba(255, 255, 255, 1);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .file-icon {
+      font-size: 1.8rem;
+      color: #2563eb;
+    }
+
+    .file-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #1e293b;
+    }
+
+    .file-size {
+      font-size: 0.82rem;
+      color: #64748b;
+    }
+
+    /* 4가지 분석 지표 그리드 */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border-radius: 22px;
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 1);
+      box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .metric-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .metric-header i {
+      font-size: 1.1rem;
+    }
+
+    .metric-value-box {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .metric-val {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+    }
+
+    .metric-unit {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .metric-sub {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .btn-reset {
+      align-self: center;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 10px 24px;
+      border-radius: 100px;
+      color: #475569;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-reset:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header>
+    <div class="header-logo">
+      <a href="https://nanalab.kr" target="_blank" rel="noopener noreferrer">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='inline';">
+        <span id="fallback-logo" class="logo-fallback">NANALAB</span>
+      </a>
+    </div>
+    <div class="site-title">DOCX Analyzer</div>
+  </header>
+
+  <!-- 메인 영역 -->
+  <main>
+
+    <div class="hero-section">
+      <h1 class="hero-title">DOCX 문서 정밀 분석기</h1>
+      <p class="hero-sub">Word (.docx) 문서의 글자 수, 단어 수, 공백 개수 및 이미지를 자동 측정합니다.</p>
+    </div>
+
+    <!-- 업로드 드래그 앤 드롭 영역 -->
+    <div class="dropzone" id="dropzone">
+      <div class="dropzone-icon">
+        <i class="fa-solid fa-file-word"></i>
+      </div>
+      <div class="dropzone-title">Upload or Drop your DOCX file</div>
+      <div class="dropzone-sub">Microsoft Word (.docx) 문서 파일 분석을 지원합니다</div>
+      <button type="button" class="btn-select" onclick="document.getElementById('file-input').click();">
+        <i class="fa-solid fa-folder-open"></i> DOCX 파일 선택하기
+      </button>
+      <input type="file" id="file-input" accept=".docx">
+    </div>
+
+    <!-- 분석 결과 대시보드 -->
+    <div class="result-section" id="result-section">
+      
+      <!-- 파일 메타 정보 카드 -->
+      <div class="file-meta-card">
+        <div class="file-info">
+          <i class="fa-solid fa-file-word file-icon"></i>
+          <div>
+            <div class="file-name" id="doc-name">document.docx</div>
+            <div class="file-size" id="doc-size">0 KB</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4가지 측정 항목 지표 그리드 -->
+      <div class="metrics-grid">
+        
+        <!-- 1. 글자 수 -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <i class="fa-solid fa-font" style="color: #2563eb;"></i> 글자 수 (Characters)
+          </div>
+          <div class="metric-value-box">
+            <span class="metric-val" id="val-char-total">0</span>
+            <span class="metric-unit">자</span>
+          </div>
+          <div class="metric-sub" id="val-char-sub">공백 제외: 0자</div>
+        </div>
+
+        <!-- 2. 단어 수 -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <i class="fa-solid fa-align-left" style="color: #7c3aed;"></i> 단어 수 (Words)
+          </div>
+          <div class="metric-value-box">
+            <span class="metric-val" id="val-words">0</span>
+            <span class="metric-unit">개</span>
+          </div>
+          <div class="metric-sub">어절 / 띄어쓰기 구분 기준</div>
+        </div>
+
+        <!-- 3. 공백 개수 -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <i class="fa-solid fa-border-none" style="color: #f59e0b;"></i> 공백 개수 (Spaces)
+          </div>
+          <div class="metric-value-box">
+            <span class="metric-val" id="val-spaces">0</span>
+            <span class="metric-unit">개</span>
+          </div>
+          <div class="metric-sub">스페이스바, 탭, 줄바꿈 포함</div>
+        </div>
+
+        <!-- 4. 이미지 개수 -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <i class="fa-solid fa-image" style="color: #10b981;"></i> 이미지 개수 (Images)
+          </div>
+          <div class="metric-value-box">
+            <span class="metric-val" id="val-images">0</span>
+            <span class="metric-unit">개</span>
+          </div>
+          <div class="metric-sub">본문에 포함된 그림 및 개체 수</div>
+        </div>
+
+      </div>
+
+      <!-- 다른 파일 분석하기 버튼 -->
+      <button type="button" class="btn-reset" onclick="resetAnalyzer()">
+        <i class="fa-solid fa-arrow-rotate-left"></i> 다른 DOCX 파일 분석하기
+      </button>
+
+    </div>
+
+  </main>
+
+  <script>
+    // 마우스 추적 배경 인터랙션
+    document.addEventListener('mousemove', (e) => {
+      const xPercent = (e.clientX / window.innerWidth) * 100;
+      const yPercent = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty('--mouse-x', `${xPercent}%`);
+      document.documentElement.style.setProperty('--mouse-y', `${yPercent}%`);
+    });
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const resultSection = document.getElementById('result-section');
+
+    const docName = document.getElementById('doc-name');
+    const docSize = document.getElementById('doc-size');
+
+    const valCharTotal = document.getElementById('val-char-total');
+    const valCharSub = document.getElementById('val-char-sub');
+    const valWords = document.getElementById('val-words');
+    const valSpaces = document.getElementById('val-spaces');
+    const valImages = document.getElementById('val-images');
+
+    // 드래그 앤 드롭 이벤트
+    ['dragenter', 'dragover'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+      });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      const files = e.dataTransfer.files;
+      if (files.length > 0) handleDocxFile(files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleDocxFile(e.target.files[0]);
+        fileInput.value = '';
+      }
+    });
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // DOCX 파싱 및 분석 메인 로직
+    async function handleDocxFile(file) {
+      if (!file.name.toLowerCase().endsWith('.docx')) {
+        alert('.docx 확장자의 Word 문서 파일만 올려주세요.');
+        return;
+      }
+
+      docName.innerText = file.name;
+      docSize.innerText = formatBytes(file.size);
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        
+        // 1. Mammoth.js를 이용해 Raw Text 추출 (글자 수, 단어 수, 공백 파악용)
+        const textResult = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+        const text = textResult.value || "";
+
+        // 2. HTML 변환을 통해 <img> 태그 개수 추출 (이미지 수 파악용)
+        let imageCount = 0;
+        const htmlResult = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer }, {
+          convertImage: mammoth.images.inline((element) => {
+            imageCount++;
+            return { src: "" };
+          })
+        });
+
+        // 텍스트 수치 계산
+        const totalChars = text.length; // 공백 포함 글자 수
+        const charNoSpace = text.replace(/[\s\r\n]/g, '').length; // 공백 제외 글자 수
+        const spaceCount = totalChars - charNoSpace; // 공백 수
+
+        // 단어 수 (공백/줄바꿈 기준 분할)
+        const words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+
+        // 대시보드 UI 반영
+        valCharTotal.innerText = totalChars.toLocaleString();
+        valCharSub.innerText = `공백 제외: ${charNoSpace.toLocaleString()}자`;
+        valWords.innerText = words.toLocaleString();
+        valSpaces.innerText = spaceCount.toLocaleString();
+        valImages.innerText = imageCount.toLocaleString();
+
+        dropzone.style.display = 'none';
+        resultSection.style.display = 'flex';
+
+      } catch (err) {
+        console.error(err);
+        alert('DOCX 문서를 해석하는 도중 오류가 발생했습니다.');
+      }
+    }
+
+    function resetAnalyzer() {
+      dropzone.style.display = 'block';
+      resultSection.style.display = 'none';
+    }
+  </script>
+</body>
+</html>

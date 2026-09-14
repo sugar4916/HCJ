@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>우리 결혼합니다</title>
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600&family=Montserrat:wght@300;400;600&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Noto Serif KR', serif;
+      background-color: #f5f3f0;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .mobile-container {
+      width: 100%;
+      max-width: 480px;
+      background-color: #ffffff;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+
+    /* 메인 히어로 섹션 */
+    .hero {
+      position: relative;
+      text-align: center;
+      background-color: #fff;
+    }
+    .hero-img-wrapper {
+      width: 100%;
+      height: 480px;
+      overflow: hidden;
+    }
+    .hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .hero-content {
+      padding: 30px 20px;
+    }
+    .hero-title {
+      font-size: 0.85rem;
+      letter-spacing: 4px;
+      color: #9a8c80;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .hero-names {
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: #2b2b2b;
+      margin-bottom: 8px;
+    }
+    .hero-date {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      color: #888;
+      letter-spacing: 1px;
+    }
+
+    /* 공통 섹션 */
+    .section {
+      padding: 45px 25px;
+      text-align: center;
+      border-bottom: 1px solid #f2ede9;
+    }
+    .section-title {
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      color: #a89f91;
+      text-transform: uppercase;
+      margin-bottom: 25px;
+    }
+
+    /* 청첩장 인사말 (문구.txt 적용) */
+    .greeting-text {
+      line-height: 2.2;
+      font-size: 0.95rem;
+      color: #555;
+      white-space: pre-line;
+    }
+    .couple-info {
+      margin-top: 35px;
+      font-size: 0.95rem;
+      line-height: 2;
+      color: #444;
+    }
+
+    /* 카운트다운 타이머 */
+    .countdown-section {
+      background-color: #faf7f4;
+    }
+    .timer-title {
+      font-size: 1.05rem;
+      color: #555;
+      margin-bottom: 20px;
+    }
+    .timer-title span {
+      color: #b8860b;
+      font-weight: 600;
+    }
+    .timer-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    .time-box {
+      background: #ffffff;
+      border: 1px solid #e8e2d9;
+      border-radius: 10px;
+      padding: 12px 6px;
+      width: 68px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .time-value {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #333;
+    }
+    .time-label {
+      font-size: 0.65rem;
+      color: #aaa;
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+
+    /* 갤러리 섹션 */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .gallery-grid .full-width {
+      grid-column: span 2;
+    }
+    .gallery-grid img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .gallery-grid .full-width img {
+      height: 280px;
+    }
+
+    /* 오시는 길 & 연락처 */
+    .location-info p {
+      line-height: 1.8;
+      font-size: 0.95rem;
+      color: #555;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 25px;
+      background-color: #f5ebe6;
+      color: #5c4d44;
+      text-decoration: none;
+      font-size: 0.85rem;
+      border: none;
+    }
+
+    footer {
+      padding: 30px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #aaa;
+      background-color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-container">
+    
+    <!-- 1. 메인 커버 -->
+    <header class="hero">
+      <div class="hero-img-wrapper">
+        <img src="pictures/함께1.png" alt="메인 사진" onerror="this.src='https://via.placeholder.com/480x480?text=pictures/함께1.png'">
+      </div>
+      <div class="hero-content">
+        <div class="hero-title">Wedding Invitation</div>
+        <h1 class="hero-names">나신랑 &nbsp;&amp;&nbsp; 이신부</h1>
+        <div class="hero-date">2026. 10. 24. SAT PM 12:00</div>
+      </div>
+    </header>
+
+    <!-- 2. 청첩장 인사말 (문구.txt 적용 공간) -->
+    <section class="section">
+      <div class="section-title">Invitation</div>
+      <div class="greeting-text">
+        서로가 마주보며 다져온 사랑을
+        이제 한 곳을 바라보며 걸어가고자 합니다.
+        
+        저희 두 사람이 하나가 되는 뜻깊은 날,
+        소중한 분들을 모시고 축복을 받고 싶습니다.
+        
+        부디 오셔서 저희의 출발을 
+        따뜻한 마음으로 함께해 주시면 감사하겠습니다.
+      </div>
+      <div class="couple-info">
+        <p><strong>나아빠 · 김엄마</strong> 의 장남 <strong>신랑</strong></p>
+        <p><strong>이아빠 · 박엄마</strong> 의 장녀 <strong>신부</strong></p>
+      </div>
+    </section>
+
+    <!-- 3. 실시간 카운트다운 -->
+    <section class="section countdown-section">
+      <div class="timer-title">
+        결혼식까지 <span id="d-day-text">D-DAY</span>
+      </div>
+      <div class="timer-container">
+        <div class="time-box">
+          <div class="time-value" id="days">00</div>
+          <div class="time-label">Days</div>
+        </div>
+        <div class="time-box">
+          <div class="time-value" id="hours">00</div>
+          <div class="time-label">Hours</div>
+        </div>
+        <div class="time-box">
+          <div class="time-value" id="minutes">00</div>
+          <div class="time-label">Mins</div>
+        </div>
+        <div class="time-box">
+          <div class="time-value" id="seconds">00</div>
+          <div class="time-label">Secs</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 갤러리 섹션 (신랑, 신부, 함께1, 함께2, 함께3 순서) -->
+    <section class="section">
+      <div class="section-title">Gallery</div>
+      <div class="gallery-grid">
+        <div>
+          <img src="pictures/신랑.png" alt="신랑 사진" onerror="this.src='https://via.placeholder.com/200x220?text=신랑.png'">
+        </div>
+        <div>
+          <img src="pictures/신부.png" alt="신부 사진" onerror="this.src='https://via.placeholder.com/200x220?text=신부.png'">
+        </div>
+        <div class="full-width">
+          <img src="pictures/함께1.png" alt="함께 1 사진" onerror="this.src='https://via.placeholder.com/400x280?text=함께1.png'">
+        </div>
+        <div>
+          <img src="pictures/함께2.png" alt="함께 2 사진" onerror="this.src='https://via.placeholder.com/200x220?text=함께2.png'">
+        </div>
+        <div>
+          <img src="pictures/함께3.png" alt="함께 3 사진" onerror="this.src='https://via.placeholder.com/200x220?text=함께3.png'">
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 예식장 정보 -->
+    <section class="section">
+      <div class="section-title">Location</div>
+      <div class="location-info">
+        <p style="font-size: 1.1rem; font-weight: 600; color: #222;">아름다운 컨벤션 3층 그랜드홀</p>
+        <p style="color: #666; margin-top: 6px;">서울시 강남구 테헤란로 123</p>
+        <p style="color: #888; margin-top: 8px; font-size: 0.85rem;">TEL. 02-123-4567</p>
+      </div>
+      <div class="btn-group">
+        <a href="tel:010-0000-0000" class="btn"><i class="fa-solid fa-phone"></i> 신랑 연락하기</a>
+        <a href="tel:010-0000-0000" class="btn"><i class="fa-solid fa-phone"></i> 신부 연락하기</a>
+      </div>
+    </section>
+
+    <footer>
+      <p>Thank you for sharing our special day.</p>
+    </footer>
+
+  </div>
+
+  <script>
+    // 결혼식 날짜 및 시간 설정
+    const weddingTargetDate = new Date("2026-10-24T12:00:00").getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const distance = weddingTargetDate - now;
+
+      if (distance < 0) {
+        document.getElementById("d-day-text").innerText = "D-DAY 🎉";
+        document.getElementById("days").innerText = "00";
+        document.getElementById("hours").innerText = "00";
+        document.getElementById("minutes").innerText = "00";
+        document.getElementById("seconds").innerText = "00";
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      document.getElementById("days").innerText = String(days).padStart(2, '0');
+      document.getElementById("hours").innerText = String(hours).padStart(2, '0');
+      document.getElementById("minutes").innerText = String(minutes).padStart(2, '0');
+      document.getElementById("seconds").innerText = String(seconds).padStart(2, '0');
+      
+      document.getElementById("d-day-text").innerText = `D-${days}`;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video to GIF</title>
+
+  <!-- Pretendard 폰트 & FontAwesome 아이콘 라이브러리 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Gifshot 라이브러리 (비디오 ➔ GIF 브라우저 변환 엔진) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1e293b;
+      
+      /* 마우스 커서를 따라 움직이는 동적 파스텔 그라데이션 배경 */
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(199, 210, 254, 0.75) 0%, rgba(243, 232, 255, 0.45) 30%, rgba(254, 242, 242, 0.1) 60%),
+        linear-gradient(135deg, #f0f7ff 0%, #f5f3ff 50%, #fef2f2 100%);
+      background-attachment: fixed;
+    }
+
+    /* 1 & 2. 상단 헤더 */
+    header {
+      width: 100%;
+      height: 72px;
+      padding: 0 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      z-index: 100;
+    }
+
+    /* 1. logo.png (클릭 시 https://nanalab.kr 이동) */
+    .header-logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      height: 38px;
+      object-fit: contain;
+    }
+
+    .logo-fallback {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #4f46e5;
+      display: none;
+    }
+
+    /* 2. 우상단 타이틀 */
+    .site-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* 메인 컨테이너 */
+    main {
+      flex: 1;
+      max-width: 820px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* 3 & 4. 메인 대형 타이틀 문구 */
+    .hero-section {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* 3. Video ➔ GIF 메인 문구 */
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* 4. Sub Title */
+    .hero-subtitle {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    /* 5. 드래그 앤 드롭 및 업로드 영역 */
+    .dropzone {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 2px dashed #a5b4fc;
+      border-radius: 28px;
+      padding: 48px 24px;
+      text-align: center;
+      box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: #6366f1;
+      background: rgba(255, 255, 255, 0.95);
+      transform: translateY(-2px);
+      box-shadow: 0 25px 50px -10px rgba(99, 102, 241, 0.18),
+                  0 0 0 2px #6366f1;
+    }
+
+    .dropzone-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6366f1;
+      font-size: 1.6rem;
+    }
+
+    .dropzone-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+
+    .dropzone-sub {
+      font-size: 0.88rem;
+      color: #64748b;
+      margin-bottom: 24px;
+    }
+
+    .btn-select {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      padding: 13px 30px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(79, 70, 229, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-select:hover {
+      background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+      transform: translateY(-1px);
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    /* 8. FPS 제한 뱃지 안내 */
+    .fps-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: -12px;
+      padding: 6px 16px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #6366f1;
+      border: 1px solid rgba(224, 231, 255, 0.8);
+      align-self: center;
+    }
+
+    /* 6. 파일 목록 */
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .file-item {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 16px 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04),
+                  0 0 0 1px rgba(255, 255, 255, 1);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 6. 왼쪽 썸네일 */
+    .thumb-preview {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      object-fit: cover;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+
+    .file-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .file-name-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .file-name {
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 320px;
+    }
+
+    .file-size {
+      font-size: 0.78rem;
+      color: #64748b;
+    }
+
+    /* 6. 썸네일 옆 프로그레스 바 */
+    .progress-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .progress-bar-bg {
+      flex: 1;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+      border-radius: 100px;
+      transition: width 0.15s ease;
+    }
+
+    .progress-text {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #6366f1;
+      min-width: 42px;
+      text-align: right;
+    }
+
+    /* 6. 다운로드 버튼 */
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border-radius: 100px;
+      border: none;
+      background: #e2e8f0;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: not-allowed;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .btn-download.active {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+
+    .btn-download.active:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header>
+    <!-- 1. logo.png (클릭 시 nanalab.kr 이동) -->
+    <div class="header-logo">
+      <a href="https://nanalab.kr" target="_blank" rel="noopener noreferrer" title="nanalab.kr로 이동">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='inline';">
+        <span id="fallback-logo" class="logo-fallback">NANALAB</span>
+      </a>
+    </div>
+    <!-- 2. 우상단 타이틀 -->
+    <div class="site-title">Video to GIF</div>
+  </header>
+
+  <!-- 메인 영역 -->
+  <main>
+    
+    <!-- 3 & 4. 메인 대형 타이틀 문구 -->
+    <div class="hero-section">
+      <h1 class="hero-title">
+        Video <i class="fa-solid fa-arrow-right-long" style="font-size: 2.2rem;"></i> GIF
+      </h1>
+      <p class="hero-subtitle">Make your own GIF Animation!</p>
+    </div>
+
+    <!-- 8. FPS 제한 안내 -->
+    <div class="fps-badge">
+      <i class="fa-solid fa-bolt"></i> 빠른 처리를 위해 최대 20 FPS로 제한됩니다
+    </div>
+
+    <!-- 5. 파일 업로드 및 드래그 앤 드롭 메뉴 -->
+    <div class="dropzone" id="dropzone">
+      <div class="dropzone-icon">
+        <i class="fa-solid fa-file-video"></i>
+      </div>
+      <div class="dropzone-title">Upload or Drop your video!</div>
+      <div class="dropzone-sub">MP4, WebM, MOV 동영상 파일을 올려주세요</div>
+      <button type="button" class="btn-select" onclick="document.getElementById('file-input').click();">
+        <i class="fa-solid fa-folder-open"></i> 동영상 선택하기
+      </button>
+      <input type="file" id="file-input" multiple accept="video/*">
+    </div>
+
+    <!-- 6. 파일 변환 진행 목록 -->
+    <div class="file-list" id="file-list"></div>
+
+  </main>
+
+  <script>
+    // 마우스 추적 파스텔 배경 인터랙션
+    document.addEventListener('mousemove', (e) => {
+      const xPercent = (e.clientX / window.innerWidth) * 100;
+      const yPercent = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty('--mouse-x', `${xPercent}%`);
+      document.documentElement.style.setProperty('--mouse-y', `${yPercent}%`);
+    });
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const fileListContainer = document.getElementById('file-list');
+
+    // 5. 드래그 앤 드롭 이벤트 처리
+    ['dragenter', 'dragover'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+      });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFiles(e.target.files);
+        fileInput.value = '';
+      }
+    });
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function handleFiles(files) {
+      const videoFiles = Array.from(files).filter(f => f.type.startsWith('video/'));
+      if (videoFiles.length === 0) {
+        alert('동영상 파일(MP4, WebM, MOV 등)만 업로드할 수 있습니다.');
+        return;
+      }
+
+      videoFiles.forEach(file => processVideoToGif(file));
+    }
+
+    // 7 & 8. 비디오 ➔ GIF 변환 처리 (20 FPS 제한)
+    function processVideoToGif(file) {
+      const fileId = 'file_' + Math.random().toString(36).substr(2, 9);
+      const videoUrl = URL.createObjectURL(file);
+
+      // 6. UI 항목 생성 (썸네일, 프로그레스 바, 다운로드 버튼)
+      const itemHTML = `
+        <div class="file-item" id="${fileId}">
+          <canvas id="canvas_${fileId}" style="display:none;"></canvas>
+          <img id="thumb_${fileId}" class="thumb-preview" alt="thumbnail" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' fill='%23cbd5e1'><rect width='64' height='64'/></svg>">
+          <div class="file-details">
+            <div class="file-name-group">
+              <span class="file-name">${file.name}</span>
+              <span class="file-size">${formatBytes(file.size)}</span>
+            </div>
+            <div class="progress-wrapper">
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="bar_${fileId}"></div>
+              </div>
+              <span class="progress-text" id="text_${fileId}">0%</span>
+            </div>
+          </div>
+          <button class="btn-download" id="btn_${fileId}" disabled>
+            <i class="fa-solid fa-download"></i> 다운로드
+          </button>
+        </div>
+      `;
+
+      fileListContainer.insertAdjacentHTML('afterbegin', itemHTML);
+
+      const bar = document.getElementById(`bar_${fileId}`);
+      const text = document.getElementById(`text_${fileId}`);
+      const btn = document.getElementById(`btn_${fileId}`);
+      const thumbImg = document.getElementById(`thumb_${fileId}`);
+
+      // 8. 20 FPS 설정 (프레임 간격 0.05초 = 20 FPS)
+      const targetFPS = 20; 
+      const frameInterval = 1 / targetFPS; // 0.05s
+
+      // 동영상 로드 및 첫 프레임 썸네일 추출
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.muted = true;
+      video.src = videoUrl;
+
+      video.onloadeddata = () => {
+        // 첫 프레임 썸네일 생성
+        video.currentTime = 0.1;
+      };
+
+      video.onseeked = () => {
+        if (!thumbImg.dataset.captured) {
+          thumbImg.dataset.captured = 'true';
+          const canvas = document.createElement('canvas');
+          canvas.width = 120;
+          canvas.height = 120;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(video, 0, 0, 120, 120);
+          thumbImg.src = canvas.toDataURL('image/jpeg');
+
+          // GIF 변환 시작
+          startGifEncoding();
+        }
+      };
+
+      function startGifEncoding() {
+        // 최대 프레임 수 제한 (고속 변환을 위해 최대 4초~5초 상당인 80프레임 제한)
+        const duration = Math.min(video.duration || 5, 5); 
+        const numFrames = Math.min(Math.floor(duration * targetFPS), 80);
+
+        // Gifshot 변환 옵션 (20 FPS 적용)
+        gifshot.createGIF({
+          video: [videoUrl],
+          numFrames: numFrames,
+          interval: frameInterval, // 20 FPS
+          gifWidth: 400,
+          gifHeight: 300,
+          sampleInterval: 10,
+          numWorkers: 2,
+          progressCallback: (captureProgress) => {
+            const currentProgress = Math.round(captureProgress * 100);
+            bar.style.width = `${currentProgress}%`;
+            text.innerText = `${currentProgress}%`;
+          },
+          completeCallback: (obj) => {
+            if (!obj.error) {
+              // 6. 100% 완료 처리
+              bar.style.width = '100%';
+              text.innerText = '완료';
+              text.style.color = '#059669';
+
+              // 생성된 GIF 썸네일 교체
+              thumbImg.src = obj.image;
+
+              // 다운로드 버튼 활성화
+              btn.classList.add('active');
+              btn.removeAttribute('disabled');
+
+              const gifBase64 = obj.image;
+              const downloadName = file.name.replace(/\.[^/.]+$/, "") + ".gif";
+
+              btn.onclick = () => {
+                const a = document.createElement('a');
+                a.download = downloadName;
+                a.href = gifBase64;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+              };
+            } else {
+              text.innerText = '오류';
+              text.style.color = '#ef4444';
+            }
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>

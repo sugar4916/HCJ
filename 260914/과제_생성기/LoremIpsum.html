@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Lorem Ipsum Generator</title>
+
+  <!-- Pretendard 폰트 & FontAwesome 아이콘 라이브러리 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1e293b;
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(199, 210, 254, 0.75) 0%, rgba(243, 232, 255, 0.45) 30%, rgba(254, 242, 242, 0.1) 60%),
+        linear-gradient(135deg, #f0f7ff 0%, #f5f3ff 50%, #fef2f2 100%);
+      background-attachment: fixed;
+    }
+
+    /* 상단 헤더 */
+    header {
+      width: 100%;
+      height: 72px;
+      padding: 0 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      z-index: 100;
+    }
+
+    .header-logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      height: 38px;
+      object-fit: contain;
+    }
+
+    .logo-fallback {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #4f46e5;
+      display: none;
+    }
+
+    .site-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* 메인 컨테이너 */
+    main {
+      flex: 1;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .hero-section {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hero-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 0.95rem;
+      color: #64748b;
+    }
+
+    /* 슬라이더 컨트롤 카드 */
+    .control-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 24px 28px;
+      box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .control-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .length-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #e0e7ff;
+      color: #4338ca;
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .length-badge input[type="number"] {
+      width: 64px;
+      border: none;
+      background: transparent;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #4338ca;
+      text-align: right;
+      outline: none;
+    }
+
+    /* 슬라이더 스타일 */
+    .slider-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .slider-wrapper span {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      height: 8px;
+      border-radius: 100px;
+      background: #e2e8f0;
+      outline: none;
+      accent-color: #6366f1;
+      cursor: pointer;
+    }
+
+    /* 분량 단축 버튼 */
+    .preset-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .preset-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #64748b;
+      margin-right: 4px;
+    }
+
+    .preset-btn {
+      padding: 6px 14px;
+      border-radius: 100px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .preset-btn:hover {
+      background: #f1f5f9;
+      border-color: #6366f1;
+      color: #4f46e5;
+    }
+
+    /* 메트릭 정보 바 */
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .metric-badge {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .metric-badge .lbl {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .metric-badge .val {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    /* 텍스트 결과 카드 */
+    .result-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .result-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 12px;
+    }
+
+    .result-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      padding: 8px 16px;
+      border-radius: 100px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .action-btn.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+    }
+
+    /* 텍스트 박스 */
+    .lorem-output {
+      width: 100%;
+      min-height: 220px;
+      max-height: 480px;
+      overflow-y: auto;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 20px;
+      font-size: 1.02rem;
+      line-height: 1.7;
+      color: #334155;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header>
+    <div class="header-logo">
+      <a href="https://nanalab.kr" target="_blank" rel="noopener noreferrer">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='inline';">
+        <span id="fallback-logo" class="logo-fallback">NANALAB</span>
+      </a>
+    </div>
+    <div class="site-title">Lorem Ipsum Generator</div>
+  </header>
+
+  <!-- 메인 영역 -->
+  <main>
+    
+    <div class="hero-section">
+      <h1 class="hero-title">Lorem Ipsum 더미 텍스트 생성기</h1>
+      <p class="hero-sub">슬라이더를 조절하여 원하는 글자 수만큼의 Lorem Ipsum을 생성하세요.</p>
+    </div>
+
+    <!-- 슬라이더 컨트롤 영역 -->
+    <div class="control-card">
+      <div class="control-header">
+        <div class="control-label">
+          <i class="fa-solid fa-sliders" style="color: #6366f1;"></i> 글자 수 설정 (10자 ~ 5,000자)
+        </div>
+        <div class="length-badge">
+          <input type="number" id="num-input" value="150" min="10" max="5000">
+          <span>자</span>
+        </div>
+      </div>
+
+      <!-- 10자 ~ 5000자 슬라이더 -->
+      <div class="slider-wrapper">
+        <span>10자</span>
+        <input type="range" id="length-slider" min="10" max="5000" value="150">
+        <span>5,000자</span>
+      </div>
+
+      <!-- 단축 프리셋 버튼 -->
+      <div class="preset-pills">
+        <span class="preset-title">빠른 선택:</span>
+        <button class="preset-btn" onclick="setPreset(100)">100자</button>
+        <button class="preset-btn" onclick="setPreset(300)">300자</button>
+        <button class="preset-btn" onclick="setPreset(500)">500자</button>
+        <button class="preset-btn" onclick="setPreset(1000)">1,000자</button>
+        <button class="preset-btn" onclick="setPreset(2500)">2,500자</button>
+      </div>
+    </div>
+
+    <!-- 메트릭 요약 정보 -->
+    <div class="metrics-bar">
+      <div class="metric-badge">
+        <span class="lbl">현재 글자 수</span>
+        <span class="val" id="metric-chars">150자</span>
+      </div>
+      <div class="metric-badge">
+        <span class="lbl">단어 수</span>
+        <span class="val" id="metric-words">22개</span>
+      </div>
+      <div class="metric-badge">
+        <span class="lbl">문장 수</span>
+        <span class="val" id="metric-sentences">3개</span>
+      </div>
+    </div>
+
+    <!-- 결과 출력 영역 -->
+    <div class="result-card">
+      <div class="result-toolbar">
+        <div class="result-title">
+          <i class="fa-solid fa-align-left" style="color: #6366f1;"></i> 생성된 Lorem Ipsum
+        </div>
+        <div class="btn-group">
+          <button class="action-btn" onclick="downloadTxt()"><i class="fa-solid fa-download"></i> Download .txt</button>
+          <button class="action-btn primary" onclick="copyToClipboard()"><i class="fa-solid fa-copy"></i> Copy Text</button>
+        </div>
+      </div>
+
+      <!-- 텍스트 디스플레이 박스 -->
+      <div class="lorem-output" id="lorem-box"></div>
+    </div>
+
+  </main>
+
+  <script>
+    // 풍부한 Lorem Ipsum 소스 데이터 세트
+    const loremBaseText = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Curabitur pretium tiddunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida. Duis ac tellus et risus vulputate vehicula. Donec lobortis risus a elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Proin suscipit nulla quis orci. Donec quis orci eget orci vehicula condimentum. Curabitur in libero ut massa volutpat convallis. Morbi odio odio, elementum eu, interdum id, tempor quis, ante. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia. Nam pretium turpis et arcu. Duis arcu tor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy met. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut eros et nisl sagittis vestibulum. Nullam nulla eros, ultricies sit amet, nonummy id, imperdiet feugiat, pede. Sed lectus. Donec mollis hendrerit risus. Phasellus nec sem in justo pellentesque facilisis. Etiam imperdiet imperdiet orci. Nunc nec neque. Phasellus leo dolor, tempus non, auctor et, hendrerit quis, nisi. Curabitur ligula sapien, tincidunt non, euismod vitae, posuere imperdiet, leo. Maecenas malesuada. Praesent congue erat at massa. Sed cursus turpis vitae tortor. Donec posuere vulputate arcu. Phasellus accumsan cursus velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci. Phasellus consectetuer vestibulum elit. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc. Vestibulum fringilla pede sit amet augue. In turpis. Pellentesque posuere. Praesent turpis. Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus. Donec elit libero, sodales nec, volutpat a, suscipit non, turpis. Nullam sagittis. Suspendisse pulvinar, augue ac venenatis condimentum, sem libero volutpat nibh, nec pellentesque velit pede quis nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Fusce id purpureus. Ut id nisl quis enim dignissim sagittis. Etiam sollicitudin, ipsum eu pulvinar rutrum, tellus tellus suscipit dui, id egestas eros elit egestas massa. Proin viverra, ligula sit amet ultrices semper, ligula quam dictum leo, iaculis facilisis massa nisi id dui. Aliquam erat volutpat. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus.`;
+
+    // 마우스 추적 인터랙션
+    document.addEventListener('mousemove', (e) => {
+      const xPercent = (e.clientX / window.innerWidth) * 100;
+      const yPercent = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty('--mouse-x', `${xPercent}%`);
+      document.documentElement.style.setProperty('--mouse-y', `${yPercent}%`);
+    });
+
+    const lengthSlider = document.getElementById('length-slider');
+    const numInput = document.getElementById('num-input');
+    const loremBox = document.getElementById('lorem-box');
+
+    const metricChars = document.getElementById('metric-chars');
+    const metricWords = document.getElementById('metric-words');
+    const metricSentences = document.getElementById('metric-sentences');
+
+    // 지정된 글자 수에 맞춘 Lorem Ipsum 생성 함수
+    function generateLorem(targetLength) {
+      let resultText = "";
+      while (resultText.length < targetLength) {
+        resultText += loremBaseText + " ";
+      }
+
+      // 정확한 글자 수 자르기
+      resultText = resultText.substring(0, targetLength);
+
+      // 마지막 마침표 정리 연출
+      if (!resultText.endsWith('.')) {
+        resultText = resultText.substring(0, targetLength - 1) + '.';
+      }
+
+      loremBox.innerText = resultText;
+
+      // 메트릭 정보 업데이트
+      const charLen = resultText.length;
+      const wordLen = resultText.trim().split(/\s+/).length;
+      const sentenceLen = (resultText.match(/\./g) || []).length;
+
+      metricChars.innerText = `${charLen.toLocaleString()}자`;
+      metricWords.innerText = `${wordLen.toLocaleString()}개`;
+      metricSentences.innerText = `${sentenceLen.toLocaleString()}개`;
+    }
+
+    // 슬라이더 및 수치 입력 연동
+    function updateLength(val) {
+      let targetVal = parseInt(val) || 10;
+      if (targetVal < 10) targetVal = 10;
+      if (targetVal > 5000) targetVal = 5000;
+
+      lengthSlider.value = targetVal;
+      numInput.value = targetVal;
+      generateLorem(targetVal);
+    }
+
+    lengthSlider.addEventListener('input', (e) => updateLength(e.target.value));
+    numInput.addEventListener('input', (e) => updateLength(e.target.value));
+
+    // 단축 프리셋 버튼
+    function setPreset(val) {
+      updateLength(val);
+    }
+
+    // 클립보드 복사
+    function copyToClipboard() {
+      navigator.clipboard.writeText(loremBox.innerText).then(() => {
+        alert('Lorem Ipsum 텍스트가 클립보드에 복사되었습니다!');
+      });
+    }
+
+    // .txt 다운로드
+    function downloadTxt() {
+      const blob = new Blob([loremBox.innerText], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.download = `lorem_ipsum_${numInput.value}chars.txt`;
+      a.href = URL.createObjectURL(blob);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    // 초기 실행 (기본 150자)
+    generateLorem(150);
+  </script>
+</body>
+</html>

@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Audio Studio</title>
+
+  <!-- Pretendard 폰트 & FontAwesome 아이콘 라이브러리 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1e293b;
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(199, 210, 254, 0.75) 0%, rgba(243, 232, 255, 0.45) 30%, rgba(254, 242, 242, 0.1) 60%),
+        linear-gradient(135deg, #f0f7ff 0%, #f5f3ff 50%, #fef2f2 100%);
+      background-attachment: fixed;
+    }
+
+    /* 상단 헤더 */
+    header {
+      width: 100%;
+      height: 72px;
+      padding: 0 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      z-index: 100;
+    }
+
+    .header-logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      height: 38px;
+      object-fit: contain;
+    }
+
+    .logo-fallback {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #4f46e5;
+      display: none;
+    }
+
+    .site-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* 메인 콘텐츠 */
+    main {
+      flex: 1;
+      max-width: 920px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .hero-section {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hero-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 0.95rem;
+      color: #64748b;
+    }
+
+    /* 업로드 드래그 앤 드롭 카드 */
+    .dropzone {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 2px dashed #a5b4fc;
+      border-radius: 28px;
+      padding: 48px 24px;
+      text-align: center;
+      box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: #6366f1;
+      background: rgba(255, 255, 255, 0.95);
+      transform: translateY(-2px);
+      box-shadow: 0 25px 50px -10px rgba(99, 102, 241, 0.18),
+                  0 0 0 2px #6366f1;
+    }
+
+    .dropzone-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6366f1;
+      font-size: 1.6rem;
+    }
+
+    .dropzone-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+
+    .dropzone-sub {
+      font-size: 0.88rem;
+      color: #64748b;
+      margin-bottom: 24px;
+    }
+
+    .btn-select {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      padding: 13px 30px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(79, 70, 229, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-select:hover {
+      background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+      transform: translateY(-1px);
+    }
+
+    #file-input { display: none; }
+
+    /* ==========================================
+       오디오 편집 스튜디오 영역
+       ========================================== */
+    .editor-section {
+      display: none;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .editor-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 캔버스 파형 파트 */
+    .waveform-container {
+      width: 100%;
+      background: #0f172a;
+      border-radius: 18px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 120px;
+      border-radius: 12px;
+    }
+
+    /* 파형 제어 미니 정보 */
+    .audio-meta-info {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      color: #cbd5e1;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* 컨트롤 옵션 그리드 */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .control-box {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .control-lbl {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 포맷 변환 셀렉트 pill */
+    .format-pills {
+      display: flex;
+      gap: 8px;
+    }
+
+    .format-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .format-btn.active {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+
+    /* 볼륨 슬라이더 */
+    .volume-slider-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      height: 8px;
+      border-radius: 100px;
+      background: #e2e8f0;
+      outline: none;
+      accent-color: #6366f1;
+      cursor: pointer;
+    }
+
+    /* Trim 지정 숫자 인풋 */
+    .trim-inputs {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .trim-field {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .trim-field input {
+      width: 72px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      font-weight: 700;
+      color: #0f172a;
+      outline: none;
+    }
+
+    /* 플레이어 및 변환 내보내기 버튼 */
+    .action-bar {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-preview {
+      flex: 1;
+      padding: 15px;
+      border-radius: 100px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-preview:hover {
+      background: #f1f5f9;
+    }
+
+    .btn-export {
+      flex: 1.5;
+      padding: 15px;
+      border-radius: 100px;
+      border: none;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-export:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-reset {
+      align-self: center;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 10px 24px;
+      border-radius: 100px;
+      color: #475569;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-reset:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header>
+    <div class="header-logo">
+      <a href="https://nanalab.kr" target="_blank" rel="noopener noreferrer">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='inline';">
+        <span id="fallback-logo" class="logo-fallback">NANALAB</span>
+      </a>
+    </div>
+    <div class="site-title">Smart Audio Studio</div>
+  </header>
+
+  <!-- 메인 영역 -->
+  <main>
+    
+    <div class="hero-section">
+      <h1 class="hero-title">웹 오디오 편집 & 포맷 변환기</h1>
+      <p class="hero-sub">MP3, WAV 등 오디오 파일의 구간 자르기(Trim), 볼륨 조절 및 포맷 변환을 진행하세요.</p>
+    </div>
+
+    <!-- 업로드 드래그 앤 드롭 카드 -->
+    <div class="dropzone" id="dropzone">
+      <div class="dropzone-icon">
+        <i class="fa-solid fa-file-audio"></i>
+      </div>
+      <div class="dropzone-title">Upload or Drop Audio File</div>
+      <div class="dropzone-sub">MP3, WAV, OGG, AAC, FLAC 오디오 파일 편집을 지원합니다</div>
+      <button type="button" class="btn-select" onclick="document.getElementById('file-input').click();">
+        <i class="fa-solid fa-folder-open"></i> 오디오 파일 선택하기
+      </button>
+      <input type="file" id="file-input" accept="audio/*">
+    </div>
+
+    <!-- 오디오 편집 스튜디오 카드 -->
+    <div class="editor-section" id="editor-section">
+      <div class="editor-card">
+        
+        <div class="card-title">
+          <i class="fa-solid fa-sliders" style="color: #6366f1;"></i> 오디오 파형 & 편집 컨트롤
+        </div>
+
+        <!-- 파형 Canvas 시각화 영역 -->
+        <div class="waveform-container">
+          <canvas id="waveform-canvas"></canvas>
+          <div class="audio-meta-info">
+            <span id="audio-filename">file.mp3</span>
+            <span id="audio-duration">00:00 / 00:00</span>
+          </div>
+        </div>
+
+        <!-- 3가지 제어 기능 그리드 (포맷 변환 / 볼륨 조절 / 일부 구간 Trim) -->
+        <div class="controls-grid">
+          
+          <!-- 1. 포맷 변환 선택 -->
+          <div class="control-box">
+            <div class="control-lbl">
+              <i class="fa-solid fa-file-export" style="color: #6366f1;"></i> 1. 출력 포맷 변환
+            </div>
+            <div class="format-pills">
+              <button class="format-btn active" data-format="wav">WAV (무손실)</button>
+              <button class="format-btn" data-format="mp3">MP3 / WebM</button>
+            </div>
+          </div>
+
+          <!-- 2. 볼륨 조절 (0% ~ 300%) -->
+          <div class="control-box">
+            <div class="control-lbl">
+              <i class="fa-solid fa-volume-high" style="color: #10b981;"></i> 2. 볼륨 게인 조절
+            </div>
+            <div class="volume-slider-wrapper">
+              <i class="fa-solid fa-volume-low" style="color: #94a3b8;"></i>
+              <input type="range" id="volume-slider" min="0" max="300" value="100">
+              <span id="volume-val" style="font-weight: 800; color: #6366f1; width: 44px;">100%</span>
+            </div>
+          </div>
+
+          <!-- 3. 일부 구간 Trim (자르기) -->
+          <div class="control-box">
+            <div class="control-lbl">
+              <i class="fa-solid fa-scissors" style="color: #ec4899;"></i> 3. 일부 구간 자르기 (Trim)
+            </div>
+            <div class="trim-inputs">
+              <div class="trim-field">
+                <span>시작:</span>
+                <input type="number" id="trim-start" value="0" min="0" step="0.1">
+                <span>초</span>
+              </div>
+              <span style="color: #cbd5e1;">~</span>
+              <div class="trim-field">
+                <span>종료:</span>
+                <input type="number" id="trim-end" value="10" min="0" step="0.1">
+                <span>초</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 플레이어 & 내보내기 실행 바 -->
+        <div class="action-bar">
+          <button type="button" class="btn-preview" id="btn-preview" onclick="togglePreview()">
+            <i class="fa-solid fa-play"></i> 미리듣기 / 재생
+          </button>
+          <button type="button" class="btn-export" onclick="exportEditedAudio()">
+            <i class="fa-solid fa-download"></i> 편집된 파일 다운로드
+          </button>
+        </div>
+
+      </div>
+
+      <button type="button" class="btn-reset" onclick="resetStudio()">
+        <i class="fa-solid fa-arrow-rotate-left"></i> 다른 오디오 파일 편집하기
+      </button>
+    </div>
+
+  </main>
+
+  <script>
+    // 마우스 추적 인터랙션
+    document.addEventListener('mousemove', (e) => {
+      const xPercent = (e.clientX / window.innerWidth) * 100;
+      const yPercent = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty('--mouse-x', `${xPercent}%`);
+      document.documentElement.style.setProperty('--mouse-y', `${yPercent}%`);
+    });
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const editorSection = document.getElementById('editor-section');
+
+    const canvas = document.getElementById('waveform-canvas');
+    const ctx = canvas.getContext('2d');
+    const audioFilename = document.getElementById('audio-filename');
+    const audioDuration = document.getElementById('audio-duration');
+
+    const volumeSlider = document.getElementById('volume-slider');
+    const volumeVal = document.getElementById('volume-val');
+
+    const trimStartInput = document.getElementById('trim-start');
+    const trimEndInput = document.getElementById('trim-end');
+
+    let audioContext = null;
+    let audioBuffer = null;
+    let originalFile = null;
+    let targetFormat = 'wav';
+
+    let currentSource = null;
+    let isPlaying = false;
+
+    // 드래그 앤 드롭 이벤트
+    ['dragenter', 'dragover'].forEach(name => {
+      dropzone.addEventListener(name, (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      dropzone.addEventListener(name, (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files.length > 0) loadAudioFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        loadAudioFile(e.target.files[0]);
+        fileInput.value = '';
+      }
+    });
+
+    // 포맷 변환 버튼 클릭
+    const formatBtns = document.querySelectorAll('.format-btn');
+    formatBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        formatBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        targetFormat = btn.dataset.format;
+      });
+    });
+
+    // 볼륨 슬라이더 반응
+    volumeSlider.addEventListener('input', (e) => {
+      volumeVal.innerText = `${e.target.value}%`;
+    });
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    // 오디오 파일 로드 & 파싱
+    async function loadAudioFile(file) {
+      originalFile = file;
+      audioFilename.innerText = file.name;
+
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const arrayBuffer = await file.arrayBuffer();
+
+      try {
+        audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        const totalDuration = audioBuffer.duration;
+
+        audioDuration.innerText = `00:00 / ${formatTime(totalDuration)}`;
+
+        // Trim 초기값 세팅 (0초 ~ 전체 길이)
+        trimStartInput.value = 0;
+        trimEndInput.value = totalDuration.toFixed(1);
+        trimStartInput.max = totalDuration.toFixed(1);
+        trimEndInput.max = totalDuration.toFixed(1);
+
+        // 파형 그리기
+        drawWaveform(audioBuffer);
+
+        dropzone.style.display = 'none';
+        editorSection.style.display = 'flex';
+
+      } catch (err) {
+        console.error(err);
+        alert('올바른 오디오 파일을 로드할 수 없습니다.');
+      }
+    }
+
+    // Canvas 오디오 파형(Waveform) 시각화
+    function drawWaveform(buffer) {
+      canvas.width = canvas.parentElement.clientWidth - 32;
+      canvas.height = 120;
+
+      const rawData = buffer.getChannelData(0);
+      const step = Math.ceil(rawData.length / canvas.width);
+      const amp = canvas.height / 2;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#6366f1';
+
+      for (let i = 0; i < canvas.width; i++) {
+        let min = 1.0;
+        let max = -1.0;
+        for (let j = 0; j < step; j++) {
+          const datum = rawData[i * step + j];
+          if (datum < min) min = datum;
+          if (datum > max) max = datum;
+        }
+        ctx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp));
+      }
+    }
+
+    // 미리듣기 (Preview)
+    function togglePreview() {
+      const btnPreview = document.getElementById('btn-preview');
+
+      if (isPlaying) {
+        if (currentSource) currentSource.stop();
+        isPlaying = false;
+        btnPreview.innerHTML = `<i class="fa-solid fa-play"></i> 미리듣기 / 재생`;
+        return;
+      }
+
+      const startSec = parseFloat(trimStartInput.value) || 0;
+      const endSec = parseFloat(trimEndInput.value) || audioBuffer.duration;
+      const duration = endSec - startSec;
+
+      if (duration <= 0) {
+        alert('Trim 종료 시간은 시작 시간보다 커야 합니다.');
+        return;
+      }
+
+      currentSource = audioContext.createBufferSource();
+      currentSource.buffer = audioBuffer;
+
+      // 볼륨 게인 조절 적용
+      const gainNode = audioContext.createGain();
+      const volumeRatio = (parseFloat(volumeSlider.value) / 100);
+      gainNode.gain.value = volumeRatio;
+
+      currentSource.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      currentSource.start(0, startSec, duration);
+      isPlaying = true;
+      btnPreview.innerHTML = `<i class="fa-solid fa-square"></i> 정지`;
+
+      currentSource.onended = () => {
+        isPlaying = false;
+        btnPreview.innerHTML = `<i class="fa-solid fa-play"></i> 미리듣기 / 재생`;
+      };
+    }
+
+    // 편집된 오디오 내보내기 (WAV 변환)
+    async function exportEditedAudio() {
+      const startSec = parseFloat(trimStartInput.value) || 0;
+      const endSec = parseFloat(trimEndInput.value) || audioBuffer.duration;
+      const duration = endSec - startSec;
+      const volumeRatio = (parseFloat(volumeSlider.value) / 100);
+
+      if (duration <= 0) {
+        alert('Trim 구간이 올바르지 않습니다.');
+        return;
+      }
+
+      const sampleRate = audioBuffer.sampleRate;
+      const numChannels = audioBuffer.numberOfChannels;
+      const frameCount = Math.floor(duration * sampleRate);
+
+      // OfflineAudioContext로 오디오 리렌더링
+      const offlineCtx = new OfflineAudioContext(numChannels, frameCount, sampleRate);
+      const source = offlineCtx.createBufferSource();
+      source.buffer = audioBuffer;
+
+      const gainNode = offlineCtx.createGain();
+      gainNode.gain.value = volumeRatio;
+
+      source.connect(gainNode);
+      gainNode.connect(offlineCtx.destination);
+
+      source.start(0, startSec, duration);
+      const renderedBuffer = await offlineCtx.startRendering();
+
+      // WAV 바이너리 인코딩
+      const wavBlob = bufferToWavBlob(renderedBuffer);
+
+      // 다운로드
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(wavBlob);
+      a.download = `edited_audio_${Date.now()}.${targetFormat}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    // AudioBuffer -> WAV Blob 변환 함수
+    function bufferToWavBlob(buffer) {
+      const numChannels = buffer.numberOfChannels;
+      const sampleRate = buffer.sampleRate;
+      const format = 1; // PCM
+      const bitDepth = 16;
+      
+      let result;
+      if (numChannels === 2) {
+        result = interleave(buffer.getChannelData(0), buffer.getChannelData(1));
+      } else {
+        result = buffer.getChannelData(0);
+      }
+
+      const dataLength = result.length * (bitDepth / 8);
+      const bufferHeader = new ArrayBuffer(44 + dataLength);
+      const view = new DataView(bufferHeader);
+
+      writeString(view, 0, 'RIFF');
+      view.setUint32(4, 36 + dataLength, true);
+      writeString(view, 8, 'WAVE');
+      writeString(view, 12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, format, true);
+      view.setUint16(22, numChannels, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * numChannels * (bitDepth / 8), true);
+      view.setUint16(32, numChannels * (bitDepth / 8), true);
+      view.setUint16(34, bitDepth, true);
+      writeString(view, 36, 'data');
+      view.setUint32(40, dataLength, true);
+
+      // Float32 -> Int16 샘플 변환
+      let offset = 44;
+      for (let i = 0; i < result.length; i++, offset += 2) {
+        const s = Math.max(-1, Math.min(1, result[i]));
+        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      }
+
+      return new Blob([bufferHeader], { type: 'audio/wav' });
+    }
+
+    function interleave(inputL, inputR) {
+      const length = inputL.length + inputR.length;
+      const result = new Float32Array(length);
+      let index = 0, inputIndex = 0;
+      while (index < length) {
+        result[index++] = inputL[inputIndex];
+        result[index++] = inputR[inputIndex];
+        inputIndex++;
+      }
+      return result;
+    }
+
+    function writeString(view, offset, string) {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    }
+
+    function resetStudio() {
+      if (isPlaying && currentSource) currentSource.stop();
+      dropzone.style.display = 'block';
+      editorSection.style.display = 'none';
+    }
+  </script>
+</body>
+</html>

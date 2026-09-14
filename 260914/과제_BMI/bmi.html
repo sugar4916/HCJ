@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart BMI Calculator</title>
+
+  <!-- Pretendard 폰트 & FontAwesome 아이콘 라이브러리 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1e293b;
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(199, 210, 254, 0.75) 0%, rgba(243, 232, 255, 0.45) 30%, rgba(254, 242, 242, 0.1) 60%),
+        linear-gradient(135deg, #f0f7ff 0%, #f5f3ff 50%, #fef2f2 100%);
+      background-attachment: fixed;
+    }
+
+    /* 상단 헤더 */
+    header {
+      width: 100%;
+      height: 72px;
+      padding: 0 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      z-index: 100;
+    }
+
+    .header-logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      height: 38px;
+      object-fit: contain;
+    }
+
+    .logo-fallback {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #4f46e5;
+      display: none;
+    }
+
+    .site-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* 메인 콘텐츠 */
+    main {
+      flex: 1;
+      max-width: 720px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .hero-section {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hero-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 0.95rem;
+      color: #64748b;
+    }
+
+    /* 입력 폼 카드 */
+    .card-form {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 28px;
+      padding: 32px 28px;
+      box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.08),
+                  0 0 0 1px rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 0 14px;
+      transition: all 0.2s ease;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 12px 0;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .input-unit {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-left: 6px;
+    }
+
+    /* 성별 선택 버튼 */
+    .gender-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .gender-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .gender-btn.active {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      border-radius: 100px;
+      border: none;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      color: #ffffff;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(37, 99, 235, 0.45);
+    }
+
+    /* ==========================================
+       BMI 결과 분석 카드
+       ========================================== */
+    .result-section {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .result-main-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border-radius: 28px;
+      padding: 32px 28px;
+      box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.12),
+                  0 0 0 1px rgba(255, 255, 255, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 20px;
+    }
+
+    .bmi-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 18px;
+      border-radius: 100px;
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .bmi-score-val {
+      font-size: 3.5rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: #0f172a;
+      line-height: 1;
+    }
+
+    /* 비만도 바 시각화 */
+    .bmi-bar-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .bmi-bar {
+      height: 12px;
+      border-radius: 100px;
+      background: linear-gradient(to right, #3b82f6 0%, #10b981 30%, #f59e0b 65%, #ef4444 100%);
+      position: relative;
+    }
+
+    .bmi-pointer {
+      position: absolute;
+      top: -4px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 4px solid #0f172a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transform: translateX(-50%);
+      transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* BMI 90%, 100%, 110% 목표 체중 카드 그리드 */
+    .target-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      width: 100%;
+    }
+
+    @media (max-width: 600px) {
+      .target-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .target-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .target-card.highlight {
+      border-color: #6366f1;
+      background: #f5f3ff;
+    }
+
+    .target-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .target-weight-val {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #0f172a;
+    }
+
+    .target-diff-badge {
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 100px;
+    }
+
+    .diff-loss { background: #fef2f2; color: #ef4444; }
+    .diff-gain { background: #eff6ff; color: #2563eb; }
+    .diff-same { background: #f0fdf4; color: #16a34a; }
+
+    .btn-reset {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      padding: 10px 24px;
+      border-radius: 100px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-reset:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header>
+    <div class="header-logo">
+      <a href="https://nanalab.kr" target="_blank" rel="noopener noreferrer">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='inline';">
+        <span id="fallback-logo" class="logo-fallback">NANALAB</span>
+      </a>
+    </div>
+    <div class="site-title">BMI Calculator Studio</div>
+  </header>
+
+  <!-- 메인 영역 -->
+  <main>
+    
+    <div class="hero-section">
+      <h1 class="hero-title">스마트 BMI & 목표 체중 계산기</h1>
+      <p class="hero-sub">신체 지수를 측정하고 BMI 90%, 100%, 110% 권장 체중 조절량을 확인하세요.</p>
+    </div>
+
+    <!-- 입력 폼 카드 -->
+    <div class="card-form" id="form-section">
+      
+      <!-- 성별 선택 -->
+      <div class="form-group">
+        <label class="form-label"><i class="fa-solid fa-venus-mars" style="color: #6366f1;"></i> 성별 선택</label>
+        <div class="gender-group">
+          <button type="button" class="gender-btn active" data-gender="male"><i class="fa-solid fa-mars"></i> 남성</button>
+          <button type="button" class="gender-btn" data-gender="female"><i class="fa-solid fa-venus"></i> 여성</button>
+        </div>
+      </div>
+
+      <!-- 키 / 몸무게 입력 -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label"><i class="fa-solid fa-ruler-vertical" style="color: #ec4899;"></i> 키 (Height)</label>
+          <div class="input-wrapper">
+            <input type="number" id="input-height" placeholder="175" min="100" max="230">
+            <span class="input-unit">cm</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label"><i class="fa-solid fa-weight-scale" style="color: #10b981;"></i> 몸무게 (Weight)</label>
+          <div class="input-wrapper">
+            <input type="number" id="input-weight" placeholder="70" min="30" max="250">
+            <span class="input-unit">kg</span>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn-submit" onclick="calculateBMI()">
+        <i class="fa-solid fa-calculator"></i> BMI & 목표 체중 계산하기
+      </button>
+
+    </div>
+
+    <!-- 분석 결과 섹션 -->
+    <div class="result-section" id="result-section">
+      <div class="result-main-card">
+        
+        <!-- 비만도 상태 뱃지 -->
+        <div class="bmi-badge" id="bmi-status-badge">정상 체중</div>
+        
+        <!-- BMI 수치 -->
+        <div>
+          <div class="bmi-score-val" id="bmi-val">22.5</div>
+          <div style="font-size: 0.85rem; color: #64748b; font-weight: 600; margin-top: 4px;">체질량지수 (kg/m²)</div>
+        </div>
+
+        <!-- 비만도 프로그레스 바 -->
+        <div class="bmi-bar-container">
+          <div class="bmi-bar">
+            <div class="bmi-pointer" id="bmi-pointer" style="left: 50%;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #94a3b8; font-weight: 600;">
+            <span>저체중 (&lt;18.5)</span>
+            <span>정상 (18.5~22.9)</span>
+            <span>과체중 (23~24.9)</span>
+            <span>비만 (25+)</span>
+          </div>
+        </div>
+
+        <!-- BMI 90%, 100%, 110% 목표 카드 그리드 -->
+        <div class="target-grid">
+          
+          <!-- BMI 90% (날씬 기준: BMI 19.8) -->
+          <div class="target-card">
+            <span class="target-label">BMI 90% (날씬 체중)</span>
+            <span class="target-weight-val" id="target-90-weight">0 kg</span>
+            <span class="target-diff-badge" id="target-90-diff">-0 kg</span>
+          </div>
+
+          <!-- BMI 100% (표준 체중: BMI 22.0) -->
+          <div class="target-card highlight">
+            <span class="target-label" style="color: #4f46e5;">BMI 100% (표준 체중)</span>
+            <span class="target-weight-val" id="target-100-weight">0 kg</span>
+            <span class="target-diff-badge" id="target-100-diff">-0 kg</span>
+          </div>
+
+          <!-- BMI 110% (상한 경계: BMI 24.2) -->
+          <div class="target-card">
+            <span class="target-label">BMI 110% (상한 체중)</span>
+            <span class="target-weight-val" id="target-110-weight">0 kg</span>
+            <span class="target-diff-badge" id="target-110-diff">-0 kg</span>
+          </div>
+
+        </div>
+
+        <button type="button" class="btn-reset" onclick="resetCalculator()">
+          <i class="fa-solid fa-arrow-rotate-left"></i> 다시 입력하기
+        </button>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let selectedGender = 'male';
+
+    // 마우스 추적 인터랙션
+    document.addEventListener('mousemove', (e) => {
+      const xPercent = (e.clientX / window.innerWidth) * 100;
+      const yPercent = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty('--mouse-x', `${xPercent}%`);
+      document.documentElement.style.setProperty('--mouse-y', `${yPercent}%`);
+    });
+
+    // 성별 버튼 클릭
+    const genderBtns = document.querySelectorAll('.gender-btn');
+    genderBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        genderBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedGender = btn.dataset.gender;
+      });
+    });
+
+    // BMI 계산 메인 로직
+    function calculateBMI() {
+      const heightCm = parseFloat(document.getElementById('input-height').value);
+      const weightKg = parseFloat(document.getElementById('input-weight').value);
+
+      if (!heightCm || heightCm <= 0 || !weightKg || weightKg <= 0) {
+        alert('올바른 키와 몸무게를 입력해 주세요.');
+        return;
+      }
+
+      const heightM = heightCm / 100;
+      const bmi = weightKg / (heightM * heightM);
+      const bmiRounded = bmi.toFixed(1);
+
+      // BMI 결과 상태 판정 (대한비만학회 기준)
+      const badge = document.getElementById('bmi-status-badge');
+      let statusText = "정상";
+      let badgeBg = "#f0fdf4";
+      let badgeColor = "#16a34a";
+
+      if (bmi < 18.5) {
+        statusText = "저체중"; badgeBg = "#eff6ff"; badgeColor = "#2563eb";
+      } else if (bmi < 23.0) {
+        statusText = "정상 체중"; badgeBg = "#f0fdf4"; badgeColor = "#16a34a";
+      } else if (bmi < 25.0) {
+        statusText = "비만 전단계 (과체중)"; badgeBg = "#fffbeb"; badgeColor = "#d97706";
+      } else if (bmi < 30.0) {
+        statusText = "1단계 비만"; badgeBg = "#fef2f2"; badgeColor = "#ef4444";
+      } else if (bmi < 35.0) {
+        statusText = "2단계 비만"; badgeBg = "#fef2f2"; badgeColor = "#dc2626";
+      } else {
+        statusText = "3단계 고도비만"; badgeBg = "#fef2f2"; badgeColor = "#991b1b";
+      }
+
+      badge.innerText = statusText;
+      badge.style.backgroundColor = badgeBg;
+      badge.style.color = badgeColor;
+
+      document.getElementById('bmi-val').innerText = bmiRounded;
+
+      // 비만도 바 위치 계산 (15 ~ 35 범위 퍼센트 변환)
+      let pointerPos = ((bmi - 15) / (35 - 15)) * 100;
+      if (pointerPos < 5) pointerPos = 5;
+      if (pointerPos > 95) pointerPos = 95;
+      document.getElementById('bmi-pointer').style.left = `${pointerPos}%`;
+
+      // ==========================================
+      // BMI 90%, 100%, 110% 목표 체중 및 조절량 계산
+      // 표준 체중(100%) 기준 BMI = 22.0
+      // BMI 90% = 22.0 * 0.9 = 19.8
+      // BMI 110% = 22.0 * 1.1 = 24.2
+      // ==========================================
+      const targetBmi100 = 22.0;
+      const targetBmi90 = 19.8;
+      const targetBmi110 = 24.2;
+
+      const targetWeight100 = targetBmi100 * (heightM * heightM);
+      const targetWeight90 = targetBmi90 * (heightM * heightM);
+      const targetWeight110 = targetBmi110 * (heightM * heightM);
+
+      renderTargetCard('target-90', targetWeight90, weightKg);
+      renderTargetCard('target-100', targetWeight100, weightKg);
+      renderTargetCard('target-110', targetWeight110, weightKg);
+
+      document.getElementById('form-section').style.display = 'none';
+      document.getElementById('result-section').style.display = 'flex';
+    }
+
+    function renderTargetCard(prefix, targetKg, currentKg) {
+      const weightValEl = document.getElementById(`${prefix}-weight`);
+      const diffValEl = document.getElementById(`${prefix}-diff`);
+
+      const diff = targetKg - currentKg;
+      const diffAbs = Math.abs(diff).toFixed(1);
+
+      weightValEl.innerText = `${targetKg.toFixed(1)} kg`;
+
+      if (Math.abs(diff) < 0.2) {
+        diffValEl.innerText = "현재 도달함";
+        diffValEl.className = "target-diff-badge diff-same";
+      } else if (diff < 0) {
+        diffValEl.innerText = `${diffAbs} kg 감량 필요`;
+        diffValEl.className = "target-diff-badge diff-loss";
+      } else {
+        diffValEl.innerText = `${diffAbs} kg 증량 필요`;
+        diffValEl.className = "target-diff-badge diff-gain";
+      }
+    }
+
+    function resetCalculator() {
+      document.getElementById('form-section').style.display = 'flex';
+      document.getElementById('result-section').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
